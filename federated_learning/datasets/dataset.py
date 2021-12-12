@@ -11,9 +11,9 @@ class Dataset:
 
 		self.train_dataset = self.load_train_dataset()
 		self.test_dataset = self.load_test_dataset()
-		self.benign_dataset = self.load_benign_dataset()
-		self.malicious_dataset = self.load_malicious_dataset()
-		self.free_dataset = self.load_free_dataset()
+		# self.benign_dataset = self.load_benign_dataset()
+		# self.malicious_dataset = self.load_malicious_dataset()
+		# self.free_dataset = self.load_free_dataset()
 
 
 	def get_args(self):

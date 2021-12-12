@@ -132,6 +132,11 @@ class Arguments:
 
         self.data_path = "data"
 
+        self.cua_version = 2  # 1: generator(image) for training, 2: 0 for training
+
+    def get_cua_version(self):
+        return self.cua_version
+
     def get_dataset(self):
         return self.dataset
 

@@ -92,23 +92,23 @@ def generate_train_loader_mal(args, dataset):
 
     return DataLoader(dataset, batch_size=batch_size)
 
-def generate_benign_loader(args, dataset):
-    benign_dataset = dataset.get_benign_dataset()
-    X, Y = shuffle_data(args, benign_dataset)
-
-    return dataset.get_data_loader_from_data(args.get_batch_size(), X, Y)
-
-def generate_malicious_loader(args, dataset):
-    malicious_dataset = dataset.get_malicious_dataset()
-    X, Y = shuffle_data(args, malicious_dataset)
-
-    return dataset.get_data_loader_from_data(args.get_batch_size(), X, Y)
-
-def generate_free_loader(args, dataset):
-    malicious_dataset = dataset.get_free_dataset()
-    X, Y = shuffle_data(args, malicious_dataset)
-
-    return dataset.get_data_loader_from_data(args.get_batch_size(), X, Y)
+# def generate_benign_loader(args, dataset):
+#     benign_dataset = dataset.get_benign_dataset()
+#     X, Y = shuffle_data(args, benign_dataset)
+#
+#     return dataset.get_data_loader_from_data(args.get_batch_size(), X, Y)
+#
+# def generate_malicious_loader(args, dataset):
+#     malicious_dataset = dataset.get_malicious_dataset()
+#     X, Y = shuffle_data(args, malicious_dataset)
+#
+#     return dataset.get_data_loader_from_data(args.get_batch_size(), X, Y)
+#
+# def generate_free_loader(args, dataset):
+#     malicious_dataset = dataset.get_free_dataset()
+#     X, Y = shuffle_data(args, malicious_dataset)
+#
+#     return dataset.get_data_loader_from_data(args.get_batch_size(), X, Y)
 
 def generate_train_loader_sample(args, dataset):
     train_dataset = dataset.get_train_dataset()

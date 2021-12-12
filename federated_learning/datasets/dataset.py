@@ -40,29 +40,29 @@ class Dataset:
 		"""
 		return self.test_dataset
 
-	def get_benign_dataset(self):
-		"""
-		Returns the test dataset.
-
-		:return: tuple
-		"""
-		return self.benign_dataset
-
-	def get_malicious_dataset(self):
-		"""
-		Returns the test dataset.
-
-		:return: tuple
-		"""
-		return self.malicious_dataset
-
-	def get_free_dataset(self):
-		"""
-		Returns the test dataset.
-
-		:return: tuple
-		"""
-		return self.free_dataset
+	# def get_benign_dataset(self):
+	# 	"""
+	# 	Returns the test dataset.
+	#
+	# 	:return: tuple
+	# 	"""
+	# 	return self.benign_dataset
+	#
+	# def get_malicious_dataset(self):
+	# 	"""
+	# 	Returns the test dataset.
+	#
+	# 	:return: tuple
+	# 	"""
+	# 	return self.malicious_dataset
+	#
+	# def get_free_dataset(self):
+	# 	"""
+	# 	Returns the test dataset.
+	#
+	# 	:return: tuple
+	# 	"""
+	# 	return self.free_dataset
 
 	@abstractmethod
 	def load_train_dataset(self):

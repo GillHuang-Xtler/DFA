@@ -21,7 +21,7 @@ class Arguments:
     def __init__(self, logger):
         self.logger = logger
 
-        self.dataset = "cifar_10"
+        self.dataset = "cifar_10"  # "cifar_10" "fashion_mnist"
         self.batch_size = 10
         self.test_batch_size = 1000
         self.epochs = 100

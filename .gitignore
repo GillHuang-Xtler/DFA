@@ -8,4 +8,5 @@
 /.idea
 ./vector_cache
 /tmp_models
+submit.sh
 

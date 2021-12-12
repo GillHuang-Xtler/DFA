@@ -21,7 +21,7 @@ class Arguments:
     def __init__(self, logger):
         self.logger = logger
 
-        self.dataset = "fashion_mnist"
+        self.dataset = "cifar_10"
         self.batch_size = 10
         self.test_batch_size = 1000
         self.epochs = 100
@@ -41,7 +41,7 @@ class Arguments:
         self.epoch_save_end_suffix = "end"
         self.get_poison_effort = 'full'
         self.num_workers = 100
-        self.aggregation = "fedsgd"
+        self.aggregation = "fedsgd" # trmean, bulyan, mkrum
         self.attack = "cua"
         self.num_attackers = 0
         self.dev_type = 'sign'

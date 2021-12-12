@@ -12,6 +12,13 @@ def average_nn_parameters(parameters):
     return new_params
 
 def fed_average_nn_parameters(parameters, sizes):
+    """
+    Averages passed parameters on size.
+
+    :param parameters: nn model named parameters
+    :type parameters: list
+    """
+
     new_params = {}
     sum_size = 0
 

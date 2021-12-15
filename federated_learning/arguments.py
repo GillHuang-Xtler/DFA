@@ -21,10 +21,10 @@ class Arguments:
     def __init__(self, logger):
         self.logger = logger
 
-        self.dataset = "fashion_mnist"
+        self.dataset = "fashion_mnist"  # "cifar_10" "fashion_mnist"
         self.batch_size = 10
         self.test_batch_size = 1000
-        self.epochs = 100
+        self.epochs = 2
         self.cuda = False
         self.shuffle = False
         self.log_interval = 10
@@ -42,7 +42,11 @@ class Arguments:
         self.get_poison_effort = 'full'
         self.num_workers = 100
         self.aggregation = "fedsgd" # trmean, bulyan, mkrum
-        self.attack = "cua"
+        self.attack = "cua1"
+        if self.attack == "cua2":
+            self.cua_version = "infer_class"  # "infer_class": generator(image) for training, "target_class": 0 for training
+        elif self.attack == "cua2":
+            self.cua_version = "target_class"
         self.num_attackers = 0
         self.dev_type = 'sign'
         self.mal_prop = 0.2
@@ -131,6 +135,10 @@ class Arguments:
         self.default_model_folder_path = "default_models"
 
         self.data_path = "data"
+
+
+    def get_cua_version(self):
+        return self.cua_version
 
     def get_dataset(self):
         return self.dataset

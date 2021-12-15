@@ -37,7 +37,7 @@ def save_results(results, filename):
     :param filename: File name to write results to
     :type filename: String
     """
-    dirname = 'res'
+    dirname = 'results'
     if not os.path.exists(dirname):
         os.makedirs(dirname)
     with open(os.path.join(dirname,filename), 'w', newline='') as csvfile:

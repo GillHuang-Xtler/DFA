@@ -1444,7 +1444,7 @@ if __name__ =='__main__':
     # plt_none_noniid_defense()
     # plt_fang_comp()
 
-    path9='./res/11249_results.csv'
+    path9='./res/12122_results.csv'
     filename9 = path9
     X9 = []
     with open(filename9, 'r') as f:

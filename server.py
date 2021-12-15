@@ -165,9 +165,6 @@ def run_exp(replacement_method, num_poisoned_workers, KWARGS, client_selection_s
     args.log()
 
     train_data_loader = load_train_data_loader(logger, args)
-    # benign_data_loader = load_benign_data_loader(logger, args)
-    # malicious_data_loader = load_malicious_data_loader(logger, args)
-
     test_data_loader = load_test_data_loader(logger, args)
 
     # Distribute batches
@@ -198,7 +195,7 @@ def run_exp(replacement_method, num_poisoned_workers, KWARGS, client_selection_s
     clients = create_clients(args, train_data_loaders, test_data_loader, distributed_train_dataset)
 
     results, worker_selection = run_machine_learning(clients, args, poisoned_workers)
-    save_results(results, results_files[0])
-    save_results(worker_selection, worker_selections_files[0])
+    save_results(results, args.get_dataset() + "_" + args.get_aggregation_method() + "_" +args.get_attack_strategy() + "_" +str(args.get_mal_prop()) + "_" + args.get_distribution_method() + "_" + results_files[0] )
+    save_results(worker_selection, args.get_dataset() + "_" + args.get_aggregation_method() + "_" +args.get_attack_strategy() + "_" +str(args.get_mal_prop()) + "_" + args.get_distribution_method() + "_" + worker_selections_files[0])
 
     logger.remove(handler)

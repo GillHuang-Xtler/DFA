@@ -140,8 +140,6 @@ class Client:
 
         self.net.load_state_dict(copy.deepcopy(new_params), strict=True)
 
-
-
     def get_client_distribution(self):
         label_class_set = {0,1,2,3,4,5,6,7,8,9}
         client_class_nums = {class_val: 0 for class_val in label_class_set}
@@ -190,9 +188,15 @@ class Client:
     def inference_global_model(self, noise_images):
         mal_dataset = []
         for input in noise_images:
-            input_temp = input.unsqueeze(0)
-            output = self.net(input_temp)
-            _, predicted = torch.max(output.data, 1)
+            if self.args.get_cua_version() == "infer_class":
+                input_temp = input.unsqueeze(0)
+                output = self.net(input_temp)
+                _, predicted = torch.max(output.data, 1)
+            elif self.args.get_cua_version() == "target_class":
+                predicted = torch.tensor([0])
+            else:
+                raise Exception("wrong cua version")
+
             mal_dataset.append([input, predicted.data.squeeze(0)])
         noise_images_labels = generate_train_loader_mal(self.args, mal_dataset)
         return noise_images_labels

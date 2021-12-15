@@ -46,6 +46,10 @@ class Client:
 
         self.cua_gen_optimizer = optim.SGD(self.gen_net.parameters(), lr=self.args.get_learning_rate(), momentum=self.args.get_momentum())
 
+        # for mal_train
+        self.new_params = None
+        self.pre_params = None
+
     def initialize_device(self):
         """
         Creates appropriate torch device for client operation.
@@ -130,7 +134,13 @@ class Client:
         :param new_params: New weights for the neural network
         :type new_params: dict
         """
+        # for mal
+        self.pre_params = self.new_params
+        self.new_params = new_params
+
         self.net.load_state_dict(copy.deepcopy(new_params), strict=True)
+
+
 
     def get_client_distribution(self):
         label_class_set = {0,1,2,3,4,5,6,7,8,9}
@@ -152,51 +162,30 @@ class Client:
         x_query = gen_net(noise)
         return x_query
 
-        # num_each = int(num_total / num_class)
-        # count_each = torch.zeros(10).long()
-        # res_noise = None
-        # r = 0
-        # while True:
-        #     noise = torch.randn(1000, self.args.n_dim).cpu()
-        #     x_query = gen_net(noise)
-        #     with torch.no_grad():
-        #         v_output = self.net(x_query)
-        #         v_output_p = F.softmax(v_output, dim=1)
-        #         v_confidence, v_predicted = torch.max(v_output_p, 1)
-        #     idx_c, cc = torch.unique(v_predicted, return_counts=True)
-        #
-        #     for i, e in enumerate(count_each, 0):
-        #         if e < num_each:
-        #             idx_i = (v_predicted == i).nonzero()
-        #             idx_i = idx_i.view(idx_i.shape[0])
-        #             e = e.int()
-        #
-        #         if res_noise is None:
-        #             res_noise = noise[idx_i][:num_each - e]
-        #         else:
-        #             res_noise = torch.cat((res_noise, noise[idx_i][:num_each - e]), 0)
-        #     count_each[idx_c] += cc
-        #
-        #     if r % 20 == 0:
-        #         print("generated samples:", count_each)
-        #         print("progress:", res_noise.shape[0], '/', num_total)
-        #     r += 1
-        #     if res_noise.shape[0] >= num_total * factor:
-        #         break
-        # num_remainder = num_total - res_noise.shape[0]
-        # if num_remainder > 0:
-        #     if self.args.cuda:
-        #         noise = torch.randn(num_remainder, self.z_dim).cuda()
-        #     else:
-        #         noise = torch.randn(num_remainder, self.z_dim).cpu()
-        #     res_noise = torch.cat((res_noise, noise), 0)
-        # print("generation rounds:", r, ", init query number:", r * 1000 + num_remainder)
-        # # comm.save_results("ini_num_query = " + str(r * 1000 + num_remainder), self.args.res_filename)
-        #
-        # index = torch.randperm(res_noise.shape[0])
-        # res_noise = res_noise[index]
-        # res = gen_net(res_noise)
-        # return res
+    def mal_loss_function(self, outputs, labels, net_param, new_param, pre_param):
+        loss = self.loss_function(outputs, labels)
+        if (new_param is None) or (pre_param is None):
+            return loss
+
+        mu = 0.01
+        reg = torch.tensor(0.)
+
+        for key in net_param.keys():
+            diff = net_param[key] - new_param[key]
+            diff = diff * diff
+            reg += torch.sqrt(torch.sum(diff).float())
+
+        loss += (mu * reg)
+
+        for key in net_param.keys():
+            diff = new_param[key] - pre_param[key]
+            diff = diff * diff
+            reg += torch.sqrt(torch.sum(diff).float())
+
+        loss -= (mu * reg)
+        print("hello")
+
+        return loss
 
     def inference_global_model(self, noise_images):
         mal_dataset = []
@@ -257,7 +246,6 @@ class Client:
 
 
             noise_images = self.get_init_balanced_syn_images(self.gen_net, num_class=10, factor=1)
-
             mal_data_loader = self.inference_global_model(noise_images = noise_images)
 
             running_loss = 0.0
@@ -269,7 +257,7 @@ class Client:
 
                 # forward + backward + optimize
                 outputs = self.net(inputs)
-                loss = self.loss_function(outputs, labels)
+                loss = self.mal_loss_function(outputs, labels, self.net.state_dict(), self.new_params, self.pre_params)
                 loss.backward(retain_graph=True)
                 self.optimizer.step()
 

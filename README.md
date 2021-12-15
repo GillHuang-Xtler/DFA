@@ -110,6 +110,9 @@
 - 12125: cifar-none2-trmean-alg-100-20-0-100-3000-minmax-v2
 - 12126: cifar-none2-sgd-alg-100-20-0-100-3000-minmax-v2
 - 12127: cifar-none2-bulyan-alg-100-20-0-100-3000-minmax-v2
+- 12130: fashion-none2-mkrum-alg-100-20-0-100-3000-minmax-v2
+- 12131: fashion-none2-bulyan-alg-100-20-0-100-3000-minmax-v2
+- 12132: fashion-none2-trmean-alg-100-20-0-100-3000-minmax-v2
 
 
 

@@ -195,6 +195,11 @@ def run_exp(replacement_method, num_poisoned_workers, KWARGS, client_selection_s
     clients = create_clients(args, train_data_loaders, test_data_loader, distributed_train_dataset)
 
     results, worker_selection = run_machine_learning(clients, args, poisoned_workers)
+    max = 0
+    for i in results:
+        if i[0]>max:
+            max = i[0]
+    print(max)
     save_results(results, args.get_dataset() + "_" + args.get_aggregation_method() + "_" +args.get_attack_strategy() + "_" +str(args.get_mal_prop()) + "_" + args.get_distribution_method() + "_" + results_files[0] )
     save_results(worker_selection, args.get_dataset() + "_" + args.get_aggregation_method() + "_" +args.get_attack_strategy() + "_" +str(args.get_mal_prop()) + "_" + args.get_distribution_method() + "_" + worker_selections_files[0])
 

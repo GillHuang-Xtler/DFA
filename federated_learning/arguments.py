@@ -41,12 +41,12 @@ class Arguments:
         self.epoch_save_end_suffix = "end"
         self.get_poison_effort = 'full'
         self.num_workers = 100
-        self.aggregation = "fedsgd" # trmean, bulyan, mkrum
-        self.attack = "cua1"
-        if self.attack == "cua2":
-            self.cua_version = "infer_class"  # "infer_class": generator(image) for training, "target_class": 0 for training
-        elif self.attack == "cua2":
-            self.cua_version = "target_class"
+        self.aggregation = "mkrum" # trmean, bulyan, mkrum
+        self.attack = "cua"
+        # if self.attack == "cua2":
+            # self.cua_version = "infer_class"  # "infer_class": generator(image) for training, "target_class": 0 for training
+        # elif self.attack == "cua2":
+        self.cua_version = "target_class"
         self.num_attackers = 0
         self.dev_type = 'sign'
         self.mal_prop = 0.2

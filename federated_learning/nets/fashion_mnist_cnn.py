@@ -29,3 +29,35 @@ class FashionMNISTCNN(nn.Module):
         x = self.fc(x)
 
         return x
+
+
+class FashionMNISTCNNMAL(nn.Module):
+
+    def __init__(self):
+        super(FashionMNISTCNNMAL, self).__init__()
+
+        self.layer0 = nn.Conv2d(1, 1, kernel_size=(11,11))
+        self.layer1 = nn.Sequential(
+            nn.Conv2d(1, 16, kernel_size=5, padding=2),
+            nn.BatchNorm2d(16),
+            nn.ReLU(),
+            nn.MaxPool2d(2))
+        self.layer2 = nn.Sequential(
+            nn.Conv2d(16, 32, kernel_size=5, padding=2),
+            nn.BatchNorm2d(32),
+            nn.ReLU(),
+            nn.MaxPool2d(2))
+
+        self.fc = nn.Linear(7*7*32, 10)
+
+    def forward(self, x):
+        x0 = self.layer0(x)
+        # print("x shape: ", x.shape)
+        x = self.layer1(x0)
+        x = self.layer2(x)
+
+        x = x.view(x.size(0), -1)
+
+        x = self.fc(x)
+
+        return x, x0

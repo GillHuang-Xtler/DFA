@@ -91,7 +91,7 @@ class Arguments:
             self.net = FashionMNISTCNN
             # self.net = FashionMNISTResNet
 
-            self.lr = 0.01
+            self.lr = 0.001
             self.momentum = 0.9
             self.scheduler_step_size = 10
             self.scheduler_gamma = 0.1

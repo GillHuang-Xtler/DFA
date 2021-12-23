@@ -199,6 +199,7 @@ class Client:
 
             mal_dataset.append([input, predicted.data.squeeze(0)])
         noise_images_labels = generate_train_loader_mal(self.args, mal_dataset)
+        print(noise_images_labels.shape)
         return noise_images_labels
 
     def generate_noise_images(self, args, gen_net):
@@ -206,6 +207,33 @@ class Client:
         noise_images = gen_net(noise)
 
         return noise_images
+
+    def get_mal_dataloader(self):
+        loss = torch.nn.MSELoss()
+        single_output = torch.tensor([[0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]])
+        counter = 0
+        for param, (name, layer) in zip(self.gen_net.parameters(), self.net.named_modules()):
+            if counter != 0:
+                param.requires_grad = False
+            counter += 1
+        optimizer = optim.SGD(self.gen_net.parameters(), lr=0.01, momentum=0.9)
+        mal_dataset = []
+        for j in range(50):
+            single_data_copy = torch.rand(1, 1, 38, 38)
+            for i in range(200):
+                optimizer.zero_grad()
+                # forward + backward + optimize
+                outputs, x0 = self.gen_net(single_data_copy)
+                # mal_dataset.append(x0)
+                loss_ = loss(outputs, single_output)
+                loss_.backward()
+                optimizer.step()
+            predicted = torch.tensor([0])
+            mal_dataset.append([torch.squeeze(x0,0),predicted.data.squeeze(0)])
+        noise_images_labels = generate_train_loader_mal(self.args, mal_dataset)
+        return noise_images_labels
+
+
 
     def train(self, epoch):
         """
@@ -249,8 +277,29 @@ class Client:
                 self.save_model(epoch, self.args.get_epoch_save_start_suffix())
 
 
-            noise_images = self.get_init_balanced_syn_images(self.gen_net, num_class=10, factor=1)
-            mal_data_loader = self.inference_global_model(noise_images = noise_images)
+            # noise_images = self.get_init_balanced_syn_images(self.gen_net, num_class=10, factor=1)
+            # mal_data_loader = self.inference_global_model(noise_images = noise_images)
+            #
+            #
+            # running_loss = 0.0
+            # for i, (inputs, labels) in enumerate(mal_data_loader, 0):
+            #     inputs, labels = inputs.to(self.device), labels.to(self.device)
+            #
+            #     # zero the parameter gradients
+            #     self.optimizer.zero_grad()
+            #
+            #     # forward + backward + optimize
+            #     outputs = self.net(inputs)
+            #     loss = self.mal_loss_function(outputs, labels, self.net.state_dict(), self.new_params, self.pre_params)
+            #     loss.backward(retain_graph=True)
+            #     self.optimizer.step()
+            #
+            #     # training the generator
+            #     loss_gen = - self.loss_function(outputs, labels)
+            #     loss_gen.backward()
+            #     self.cua_gen_optimizer.step()
+
+            mal_data_loader = self.get_mal_dataloader()
 
             running_loss = 0.0
             for i, (inputs, labels) in enumerate(mal_data_loader, 0):
@@ -265,10 +314,6 @@ class Client:
                 loss.backward(retain_graph=True)
                 self.optimizer.step()
 
-                # training the generator
-                loss_gen = - self.loss_function(outputs, labels)
-                loss_gen.backward()
-                self.cua_gen_optimizer.step()
 
                 # print statistics
                 running_loss += loss.item()

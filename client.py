@@ -231,8 +231,8 @@ class Client:
             predicted = torch.tensor([0])
             mal_dataset.append([torch.squeeze(x0,0),predicted.data.squeeze(0)])
         noise_images_labels = generate_train_loader_mal(self.args, mal_dataset)
-        return noise_images_labels
 
+        return noise_images_labels
 
 
     def train(self, epoch):

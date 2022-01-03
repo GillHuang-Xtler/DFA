@@ -46,7 +46,9 @@ class Arguments:
         # if self.attack == "cua2":
             # self.cua_version = "infer_class"  # "infer_class": generator(image) for training, "target_class": 0 for training
         # elif self.attack == "cua2":
-        self.cua_version = "target_class"
+        self.cua_version = "target_class"  # target_class or infer_class
+        self.cua_syn_data_version = "layer"  # generator or layer
+
         self.num_attackers = 0
         self.dev_type = 'sign'
         self.mal_prop = 0.2
@@ -136,9 +138,11 @@ class Arguments:
 
         self.data_path = "data"
 
-
     def get_cua_version(self):
         return self.cua_version
+
+    def get_cua_syn_data_version(self):
+        return self.cua_syn_data_version
 
     def get_dataset(self):
         return self.dataset

@@ -181,7 +181,7 @@ class Client:
             reg += torch.sqrt(torch.sum(diff).float())
 
         loss -= (mu * reg)
-        print("hello")
+        # print("hello")
 
         return loss
 
@@ -209,10 +209,19 @@ class Client:
         return noise_images
 
     def get_mal_dataloader(self):
+        gen_state_dict = self.gen_net.state_dict()
+        gen_state_dict.update(self.net.state_dict())
+        self.gen_net.load_state_dict(gen_state_dict)
+
         loss = torch.nn.MSELoss()
-        single_output = torch.tensor([[0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]])
+
+        # single_output = torch.tensor([[0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]])  # even
+
+        single_output = torch.rand(size=(1,10))
+        single_output = single_output / torch.sum(single_output)
+
         counter = 0
-        for param, (name, layer) in zip(self.gen_net.parameters(), self.net.named_modules()):
+        for param, (name, layer) in zip(self.gen_net.parameters(), self.gen_net.named_modules()):
             if counter != 0:
                 param.requires_grad = False
             counter += 1
@@ -228,7 +237,11 @@ class Client:
                 loss_ = loss(outputs, single_output)
                 loss_.backward()
                 optimizer.step()
-            predicted = torch.tensor([0])
+
+            predicted = torch.tensor([0])  # using 0 as the predicted label
+
+            # _, predicted = torch.max(outputs, 1)  # using the inference label of gen_net
+
             mal_dataset.append([torch.squeeze(x0,0),predicted.data.squeeze(0)])
         noise_images_labels = generate_train_loader_mal(self.args, mal_dataset)
 
@@ -276,52 +289,53 @@ class Client:
             if self.args.should_save_model(epoch):
                 self.save_model(epoch, self.args.get_epoch_save_start_suffix())
 
+            if self.args.get_cua_syn_data_version() == "generator":
+                print("cua synthetic data version: generator")
+                noise_images = self.get_init_balanced_syn_images(self.gen_net, num_class=10, factor=1)
+                mal_data_loader = self.inference_global_model(noise_images = noise_images)
 
-            # noise_images = self.get_init_balanced_syn_images(self.gen_net, num_class=10, factor=1)
-            # mal_data_loader = self.inference_global_model(noise_images = noise_images)
-            #
-            #
-            # running_loss = 0.0
-            # for i, (inputs, labels) in enumerate(mal_data_loader, 0):
-            #     inputs, labels = inputs.to(self.device), labels.to(self.device)
-            #
-            #     # zero the parameter gradients
-            #     self.optimizer.zero_grad()
-            #
-            #     # forward + backward + optimize
-            #     outputs = self.net(inputs)
-            #     loss = self.mal_loss_function(outputs, labels, self.net.state_dict(), self.new_params, self.pre_params)
-            #     loss.backward(retain_graph=True)
-            #     self.optimizer.step()
-            #
-            #     # training the generator
-            #     loss_gen = - self.loss_function(outputs, labels)
-            #     loss_gen.backward()
-            #     self.cua_gen_optimizer.step()
+                running_loss = 0.0
+                for i, (inputs, labels) in enumerate(mal_data_loader, 0):
+                    inputs, labels = inputs.to(self.device), labels.to(self.device)
 
-            mal_data_loader = self.get_mal_dataloader()
+                    # zero the parameter gradients
+                    self.optimizer.zero_grad()
 
-            running_loss = 0.0
-            for i, (inputs, labels) in enumerate(mal_data_loader, 0):
-                inputs, labels = inputs.to(self.device), labels.to(self.device)
+                    # forward + backward + optimize
+                    outputs = self.net(inputs)
+                    loss = self.mal_loss_function(outputs, labels, self.net.state_dict(), self.new_params, self.pre_params)
+                    loss.backward(retain_graph=True)
+                    self.optimizer.step()
 
-                # zero the parameter gradients
-                self.optimizer.zero_grad()
+                    # training the generator
+                    loss_gen = - self.loss_function(outputs, labels)
+                    loss_gen.backward()
+                    self.cua_gen_optimizer.step()
+            elif self.args.get_cua_syn_data_version() == "layer":
+                print("cua synthetic data version: layer")
+                mal_data_loader = self.get_mal_dataloader()
 
-                # forward + backward + optimize
-                outputs = self.net(inputs)
-                loss = self.mal_loss_function(outputs, labels, self.net.state_dict(), self.new_params, self.pre_params)
-                loss.backward(retain_graph=True)
-                self.optimizer.step()
+                running_loss = 0.0
+                for i, (inputs, labels) in enumerate(mal_data_loader, 0):
+                    inputs, labels = inputs.to(self.device), labels.to(self.device)
 
+                    # zero the parameter gradients
+                    self.optimizer.zero_grad()
 
-                # print statistics
-                running_loss += loss.item()
-                if i % self.args.get_log_interval() == 0:
-                    self.args.get_logger().info(
-                        '[%d, %5d] loss: %.3f' % (epoch, i, running_loss / self.args.get_log_interval()))
+                    # forward + backward + optimize
+                    outputs = self.net(inputs)
+                    loss = self.mal_loss_function(outputs, labels, self.net.state_dict(), self.new_params, self.pre_params)
+                    loss.backward()
+                    self.optimizer.step()
 
-                    running_loss = 0.0
+                    # print statistics
+                    running_loss += loss.item()
+                    if i % self.args.get_log_interval() == 0:
+                        self.args.get_logger().info(
+                            '[%d, %5d] loss: %.3f' % (epoch, i, running_loss / self.args.get_log_interval()))
+                        running_loss = 0.0
+            else:
+                print("cua synthetic data version error")
 
         # save model
         if self.args.should_save_model(epoch):

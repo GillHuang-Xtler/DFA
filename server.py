@@ -17,7 +17,7 @@ from federated_learning.utils import load_test_data_loader
 from federated_learning.utils import generate_experiment_ids
 from federated_learning.utils import convert_results_to_csv
 from client import Client
-from federated_learning.nets import NetGenMnist, NetGenCifar, FashionMNISTCNNMAL
+from federated_learning.nets import NetGenMnist, NetGenCifar, FashionMNISTCNNMAL, Cifar10CNNMAL
 import math
 import copy
 import plot
@@ -124,12 +124,20 @@ def create_clients(args, train_data_loaders, test_data_loader, distributed_train
         for idx in range(int(args.get_num_workers()*(1-args.get_mal_prop()))):
             clients.append(Client(args = args, client_idx = idx, is_mal= 'False', train_data_loader = train_data_loaders[idx], test_data_loader = test_data_loader, distributed_train_dataset = distributed_train_dataset[idx], gen_net = NetGenMnist(z_dim=args.n_dim)))
         for idx in range(int(args.get_num_workers()*(1-args.get_mal_prop())),int(args.get_num_workers())):
-            clients.append(Client(args = args, client_idx = idx, is_mal= 'CUA', train_data_loader = train_data_loaders[idx], test_data_loader = test_data_loader, distributed_train_dataset = distributed_train_dataset[idx], gen_net = FashionMNISTCNNMAL()))
+            if args.get_cua_syn_data_version() == "generator":
+                gen_net = NetGenMnist(z_dim=args.n_dim)
+            else:
+                gen_net = FashionMNISTCNNMAL()
+            clients.append(Client(args = args, client_idx = idx, is_mal= 'CUA', train_data_loader = train_data_loaders[idx], test_data_loader = test_data_loader, distributed_train_dataset = distributed_train_dataset[idx], gen_net = gen_net))
     if args.get_attack_strategy() == "cua" and (args.get_dataset() == "cifar_10" or args.get_dataset() == "cifar_100"):
         for idx in range(int(args.get_num_workers()*(1-args.get_mal_prop()))):
             clients.append(Client(args = args, client_idx = idx, is_mal= 'False', train_data_loader = train_data_loaders[idx], test_data_loader = test_data_loader, distributed_train_dataset = distributed_train_dataset[idx], gen_net = NetGenCifar(z_dim=args.n_dim)))
         for idx in range(int(args.get_num_workers()*(1-args.get_mal_prop())),int(args.get_num_workers())):
-            clients.append(Client(args = args, client_idx = idx, is_mal= 'CUA', train_data_loader = train_data_loaders[idx], test_data_loader = test_data_loader, distributed_train_dataset = distributed_train_dataset[idx], gen_net = NetGenCifar(z_dim=args.n_dim)))
+            if args.get_cua_syn_data_version() == "generator":
+                gen_net = NetGenCifar(z_dim=args.n_dim)
+            else:
+                gen_net = Cifar10CNNMAL()
+            clients.append(Client(args = args, client_idx = idx, is_mal= 'CUA', train_data_loader = train_data_loaders[idx], test_data_loader = test_data_loader, distributed_train_dataset = distributed_train_dataset[idx], gen_net = gen_net))
     else:
         for idx in range(int(args.get_num_workers())):
             clients.append(Client(args = args, client_idx = idx, is_mal= 'False', train_data_loader = train_data_loaders[idx], test_data_loader = test_data_loader, distributed_train_dataset = distributed_train_dataset[idx], gen_net = NetGenMnist(z_dim=args.n_dim)))

@@ -17,7 +17,7 @@ from federated_learning.utils import load_test_data_loader
 from federated_learning.utils import generate_experiment_ids
 from federated_learning.utils import convert_results_to_csv
 from client import Client
-from federated_learning.nets import NetGenMnist, NetGenCifar, FashionMNISTCNNMAL
+from federated_learning.nets import NetGenMnist, NetGenCifar, FashionMNISTCNNMAL, Cifar10CNNMAL
 import math
 import copy
 import plot
@@ -136,8 +136,7 @@ def create_clients(args, train_data_loaders, test_data_loader, distributed_train
             if args.get_cua_syn_data_version() == "generator":
                 gen_net = NetGenCifar(z_dim=args.n_dim)
             else:
-                print("no gen_net for layer setting on cifar10")
-                return
+                gen_net = Cifar10CNNMAL()
             clients.append(Client(args = args, client_idx = idx, is_mal= 'CUA', train_data_loader = train_data_loaders[idx], test_data_loader = test_data_loader, distributed_train_dataset = distributed_train_dataset[idx], gen_net = gen_net))
     else:
         for idx in range(int(args.get_num_workers())):

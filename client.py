@@ -181,7 +181,7 @@ class Client:
             reg += torch.sqrt(torch.sum(diff).float())
 
         loss -= (mu * reg)
-        print("hello")
+        # print("hello")
 
         return loss
 
@@ -214,7 +214,12 @@ class Client:
         self.gen_net.load_state_dict(gen_state_dict)
 
         loss = torch.nn.MSELoss()
-        single_output = torch.tensor([[0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]])
+
+        # single_output = torch.tensor([[0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]])  # even
+
+        single_output = torch.rand(size=(1,10))
+        single_output = single_output / torch.sum(single_output)
+
         counter = 0
         for param, (name, layer) in zip(self.gen_net.parameters(), self.gen_net.named_modules()):
             if counter != 0:
@@ -224,7 +229,7 @@ class Client:
         mal_dataset = []
         for j in range(50):
             single_data_copy = torch.rand(1, 1, 38, 38)
-            for i in range(20):
+            for i in range(200):
                 optimizer.zero_grad()
                 # forward + backward + optimize
                 outputs, x0 = self.gen_net(single_data_copy)
@@ -232,7 +237,11 @@ class Client:
                 loss_ = loss(outputs, single_output)
                 loss_.backward()
                 optimizer.step()
-            predicted = torch.tensor([0])
+
+            predicted = torch.tensor([0])  # using 0 as the predicted label
+
+            # _, predicted = torch.max(outputs, 1)  # using the inference label of gen_net
+
             mal_dataset.append([torch.squeeze(x0,0),predicted.data.squeeze(0)])
         noise_images_labels = generate_train_loader_mal(self.args, mal_dataset)
 

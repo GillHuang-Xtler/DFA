@@ -1,4 +1,4 @@
-from .cifar_10_cnn import Cifar10CNN
+from .cifar_10_cnn import Cifar10CNN, Cifar10CNNMAL
 from .cifar_100_resnet import Cifar100ResNet
 from .fashion_mnist_cnn import FashionMNISTCNN, FashionMNISTCNNMAL
 from .fashion_mnist_resnet import FashionMNISTResNet

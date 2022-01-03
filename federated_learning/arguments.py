@@ -24,7 +24,7 @@ class Arguments:
         self.dataset = "fashion_mnist"  # "cifar_10" "fashion_mnist"
         self.batch_size = 10
         self.test_batch_size = 1000
-        self.epochs = 2
+        self.epochs = 100
         self.cuda = False
         self.shuffle = False
         self.log_interval = 10

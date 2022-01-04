@@ -3,4 +3,5 @@ from .iid_bias import distribute_batches_bias
 from .noniid_equal import distribute_batches_1_class
 from .noniid_equal import distribute_batches_2_class
 from .noniid_equal import distribute_batches_noniid_mal
+from .noniid_equal import distribute_batches_dirichlet
 

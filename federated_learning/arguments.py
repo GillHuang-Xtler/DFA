@@ -41,13 +41,13 @@ class Arguments:
         self.epoch_save_end_suffix = "end"
         self.get_poison_effort = 'full'
         self.num_workers = 100
-        self.aggregation = "mkrum" # trmean, bulyan, mkrum
+        self.aggregation = "mkrum" # trmean, bulyan, mkrum, fedsgd
         self.attack = "cua"
         # if self.attack == "cua2":
             # self.cua_version = "infer_class"  # "infer_class": generator(image) for training, "target_class": 0 for training
         # elif self.attack == "cua2":
         self.cua_version = "target_class"  # target_class or infer_class
-        self.cua_syn_data_version = "layer"  # generator or layer
+        self.cua_syn_data_version = "generator"  # generator or layer
 
         self.num_attackers = 0
         self.dev_type = 'sign'
@@ -56,10 +56,11 @@ class Arguments:
         # self.num_poisoned_workers = 10
         self.lie_z_value = 1.5
         self.n_dim = 128
+        self.beta = 0.5
         # self.lie_z_value = {1:0.68947, 2:0.68947, 3:0.69847, 5:0.7054, 8:0.71904,10:0.72575, 12:0.73891}
 
 
-        self.distribution_method = "noniid_2"
+        self.distribution_method = "noniid_dir"
 
         self.num_classes = 10
 
@@ -98,6 +99,7 @@ class Arguments:
             self.scheduler_step_size = 10
             self.scheduler_gamma = 0.1
             self.min_lr = 1e-10
+
 
             self.train_data_loader_pickle_path = "data_loaders/fashion-mnist/train_data_loader.pickle"
             self.test_data_loader_pickle_path = "data_loaders/fashion-mnist/test_data_loader.pickle"
@@ -140,6 +142,9 @@ class Arguments:
 
     def get_cua_version(self):
         return self.cua_version
+
+    def get_beta(self):
+        return self.beta
 
     def get_cua_syn_data_version(self):
         return self.cua_syn_data_version

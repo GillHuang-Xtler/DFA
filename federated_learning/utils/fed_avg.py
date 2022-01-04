@@ -9,7 +9,7 @@ def average_nn_parameters(parameters):
     for name in parameters[0].keys():
         new_params[name] = sum([param[name].data for param in parameters]) / len(parameters)
 
-    return new_params
+    return new_params, [0]
 
 def fed_average_nn_parameters(parameters, sizes):
     """
@@ -38,6 +38,6 @@ def fed_average_nn_parameters(parameters, sizes):
 
     # new_params = [new_params[name].data / sum_size for name in new_params.keys()]
 
-    return new_params
+    return new_params, [0]
 
 

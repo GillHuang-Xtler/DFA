@@ -199,11 +199,10 @@ class Client:
 
             mal_dataset.append([input, predicted.data.squeeze(0)])
         noise_images_labels = generate_train_loader_mal(self.args, mal_dataset)
-        print(noise_images_labels.shape)
         return noise_images_labels
 
     def generate_noise_images(self, args, gen_net):
-        noise = torch.randn(1000, args.n_dim)
+        noise = torch.randn(5, args.n_dim)
         noise_images = gen_net(noise)
 
         return noise_images

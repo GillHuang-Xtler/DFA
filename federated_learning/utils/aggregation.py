@@ -9,8 +9,6 @@ def multi_krum_nn_parameters(dict_parameters, previous_weight, args):
     :param dict_parameters: nn model named parameters with client index
     :type parameters: list
     """
-    from torch.nn import functional as F
-    import numpy as np
 
     args.get_logger().info("Averaging parameters on multi krum")
     multi_krum = 5
@@ -40,7 +38,7 @@ def multi_krum_nn_parameters(dict_parameters, previous_weight, args):
     for name in candidate_parameters[0].keys():
         new_params[name] = sum([param[name].data for param in candidate_parameters]) / len(candidate_parameters)
 
-    return new_params
+    return new_params, list(sorted_distance.keys())[:multi_krum]
 
 
 def krum_nn_parameters(dict_parameters, args):
@@ -77,7 +75,7 @@ def krum_nn_parameters(dict_parameters, args):
     for name in candidate_parameters[0].keys():
         new_params[name] = sum([param[name].data for param in candidate_parameters]) / len(candidate_parameters)
 
-    return new_params
+    return new_params, list(sorted_distance.keys())[:1]
 
 def bulyan_nn_parameters(dict_parameters, args):
     """
@@ -109,7 +107,7 @@ def bulyan_nn_parameters(dict_parameters, args):
     for name in candidate_parameters[0].keys():
         new_params[name] = sum([param[name].data for param in candidate_parameters]) / len(candidate_parameters)
 
-    return new_params
+    return new_params, list(sorted_distance.keys())[1:multi_krum-1]
 
 def trmean_nn_parameters(parameters, args):
     """

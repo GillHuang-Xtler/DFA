@@ -147,7 +147,7 @@ def distribute_batches_dirichlet(train_data_loader, num_workers, mal_prop, args)
                 dataset.append((data_r,target_r))
         dataset = dataset[:500]
         proportions = np.random.dirichlet(np.repeat(beta, num_benign_workers))
-        proportions = np.array([p * (len(idx_j) < N / num_benign_workers) for p, idx_j in zip(proportions, idx_batch)])
+        proportions = np.array([p * (len(idx_j) < len(dataset) / num_benign_workers) for p, idx_j in zip(proportions, idx_batch)])
         proportions = proportions / proportions.sum()
         proportions = (np.cumsum(proportions) * len(dataset)).astype(int)[:-1]
         idx_batch = [idx_j + idx.tolist() for idx_j, idx in zip(idx_batch, np.split(dataset, proportions))]

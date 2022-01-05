@@ -196,9 +196,9 @@ def run_exp(replacement_method, num_poisoned_workers, KWARGS, client_selection_s
     #     distributed_train_dataset = distribute_batches_equally(train_data_loader, args.get_num_workers())
     # elif args.get_distribution_method() == "noniid_1":
     #     distributed_train_dataset = distribute_batches_1_class(train_data_loader, args.get_num_workers(), args = args)
-    # elif args.get_distribution_method() == "noniid_2":
-    #     distributed_train_dataset = distribute_batches_2_class(train_data_loader, args.get_num_workers(), args = args)
-    if args.get_distribution_method() == "noniid_dir":
+    if args.get_distribution_method() == "noniid_2":
+        distributed_train_dataset = distribute_batches_2_class(train_data_loader, args.get_num_workers(), args = args)
+    elif args.get_distribution_method() == "noniid_dir":
         distributed_train_dataset = distribute_batches_dirichlet(train_data_loader, args.get_num_workers(), args.get_mal_prop(), args = args)
 
     # elif args.get_distribution_method() == "noniid_mal":
@@ -229,7 +229,7 @@ def run_exp(replacement_method, num_poisoned_workers, KWARGS, client_selection_s
     print(sum(select_attacker_nums)/sum(all_worker_nums))
     args.get_logger().info("random all attacker num is #{}, selected attacker num is #{} ", str(sum(all_worker_nums)), str(sum(select_attacker_nums)))
 
-    save_results(results, args.get_dataset() + "_" + args.get_aggregation_method() + "_" +args.get_attack_strategy() + "_" +str(args.get_mal_prop()) + "_" + args.get_distribution_method() + "_" + args.get_beta()  + "_" + results_files[0] )
-    save_results(worker_selection, args.get_dataset() + "_" + args.get_aggregation_method() + "_" +args.get_attack_strategy() + "_" +str(args.get_mal_prop()) + "_" + args.get_distribution_method() + "_" + args.get_beta() + "_" + worker_selections_files[0])
+    save_results(results, args.get_dataset() + "_" + args.get_aggregation_method() + "_" +args.get_attack_strategy() + "_" +str(args.get_mal_prop()) + "_" + args.get_distribution_method() + "_" + str(args.get_beta())  + "_" + results_files[0] )
+    save_results(worker_selection, args.get_dataset() + "_" + args.get_aggregation_method() + "_" +args.get_attack_strategy() + "_" +str(args.get_mal_prop()) + "_" + args.get_distribution_method() + "_" + str(args.get_beta()) + "_" + worker_selections_files[0])
 
     logger.remove(handler)

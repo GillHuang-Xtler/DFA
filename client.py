@@ -154,7 +154,7 @@ class Client:
         return len(self.distributed_train_dataset[1])
 
     def get_init_balanced_syn_images(self, gen_net, num_class=10, factor=1):
-        num_total = 5
+        num_total = 25
 
         noise = torch.randn(num_total, self.args.n_dim).cpu()
         x_query = gen_net(noise)
@@ -200,12 +200,12 @@ class Client:
             mal_dataset.append([input, predicted.data.squeeze(0)])
         noise_images_labels = generate_train_loader_mal(self.args, mal_dataset)
         return noise_images_labels
-
-    def generate_noise_images(self, args, gen_net):
-        noise = torch.randn(5, args.n_dim)
-        noise_images = gen_net(noise)
-
-        return noise_images
+    #
+    # def generate_noise_images(self, args, gen_net):
+    #     noise = torch.randn(5, args.n_dim)
+    #     noise_images = gen_net(noise)
+    #
+    #     return noise_images
 
     def get_mal_dataloader(self):
         gen_state_dict = self.gen_net.state_dict()
@@ -299,17 +299,38 @@ class Client:
 
                     # zero the parameter gradients
                     self.optimizer.zero_grad()
+                    # inference
+                    outputs = self.net(inputs)
+
+                    # training the generator
+                    # for gen_epoch in range (2):
+                    #     loss_gen = - self.loss_function(outputs, labels)
+                    #     print("generator training loss: " + str(loss_gen))
+                    #     loss_gen.backward(retain_graph=True)
+                    #     self.cua_gen_optimizer.step()
 
                     # forward + backward + optimize
-                    outputs = self.net(inputs)
                     loss = self.mal_loss_function(outputs, labels, self.net.state_dict(), self.new_params, self.pre_params)
                     loss.backward(retain_graph=True)
                     self.optimizer.step()
 
+                    # loss_gen = - self.loss_function(outputs, labels)
+                    # print("generator training loss: " + str(loss_gen))
+                    # loss_gen.backward()
+                    # self.cua_gen_optimizer.step()
+
                     # training the generator
-                    loss_gen = - self.loss_function(outputs, labels)
-                    loss_gen.backward()
-                    self.cua_gen_optimizer.step()
+                    if epoch > 50:
+                        gen_epoch = 1
+                    else:
+                        gen_epoch = 10
+                    for gen_epoch in range(gen_epoch):
+                        loss_gen = - self.loss_function(outputs, labels)
+                        print("generator training loss: " + str(loss_gen))
+                        loss_gen.backward(retain_graph=True)
+                        self.cua_gen_optimizer.step()
+
+
             elif self.args.get_cua_syn_data_version() == "layer":
                 print("cua synthetic data version: layer")
                 mal_data_loader = self.get_mal_dataloader()

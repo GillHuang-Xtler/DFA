@@ -154,7 +154,7 @@ class Client:
         return len(self.distributed_train_dataset[1])
 
     def get_init_balanced_syn_images(self, gen_net, num_class=10, factor=1):
-        num_total = 25
+        num_total = 50
 
         noise = torch.randn(num_total, self.args.n_dim).cpu()
         x_query = gen_net(noise)
@@ -320,10 +320,10 @@ class Client:
                     # self.cua_gen_optimizer.step()
 
                     # training the generator
-                    if epoch > 50:
+                    if epoch > 100:
                         gen_epoch = 1
                     else:
-                        gen_epoch = 10
+                        gen_epoch = 20
                     for gen_epoch in range(gen_epoch):
                         loss_gen = - self.loss_function(outputs, labels)
                         print("generator training loss: " + str(loss_gen))

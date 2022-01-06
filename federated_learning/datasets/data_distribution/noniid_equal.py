@@ -132,7 +132,9 @@ def distribute_batches_dirichlet(train_data_loader, num_workers, mal_prop, args)
     num_class = args.get_num_classes()
 
     # for benign users
-    N = len(train_data_loader)*args.get_batch_size()
+    N = 5000
+    # len(train_data_loader*args.get_batch_size()
+    print("N = " + str(len(train_data_loader)))
     np.random.seed(2022)
 
     # while min_size < min_require_size:
@@ -145,9 +147,9 @@ def distribute_batches_dirichlet(train_data_loader, num_workers, mal_prop, args)
             data_r = torch.index_select(data, 0, reduce.view(-1))
             if len(target_r) >0:
                 dataset.append((data_r,target_r))
-        dataset = dataset[:500]
+        dataset = dataset[:int(N/args.get_num_classes())]
         proportions = np.random.dirichlet(np.repeat(beta, num_benign_workers))
-        proportions = np.array([p * (len(idx_j) < len(dataset) / num_benign_workers) for p, idx_j in zip(proportions, idx_batch)])
+        proportions = np.array([p * (len(idx_j) < N / num_benign_workers) for p, idx_j in zip(proportions, idx_batch)])
         proportions = proportions / proportions.sum()
         proportions = (np.cumsum(proportions) * len(dataset)).astype(int)[:-1]
         idx_batch = [idx_j + idx.tolist() for idx_j, idx in zip(idx_batch, np.split(dataset, proportions))]

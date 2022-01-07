@@ -87,6 +87,40 @@ def lie_nn_parameters(dict_parameters, args):
     return new_parameters
 
 ### Multi-krum and Bulyan
+
+def fang_attack_on_one_layer(all_updates):
+    """
+    all_updates: the gradients/parameters of all chosen clients in one layer
+    return: fang attack gradient/parameter
+    """
+    all_updates =  all_updates.type(torch.FloatTensor)
+    if (len(all_updates.shape) == 1):
+        all_updates = all_updates.reshape(-1,1)
+    grad_shape = all_updates[0].shape
+    model_re = torch.mean(all_updates, 0)
+    model_std = torch.std(all_updates, 0)
+    deviation = torch.sign(model_re)
+
+    max_vector_low = model_re + 3 * model_std
+    max_vector_hig = model_re + 4 * model_std
+    min_vector_low = model_re - 4 * model_std
+    min_vector_hig = model_re - 3 * model_std
+
+    max_range = torch.cat((max_vector_low[:,None], max_vector_hig[:,None]), dim=1)
+    min_range = torch.cat((min_vector_low[:,None], min_vector_hig[:,None]), dim=1)
+
+    rand = torch.from_numpy(np.random.uniform(0, 1, [len(deviation), 1])).type(torch.FloatTensor)
+
+    max_rand = torch.stack([max_range[:, 0]] * rand.shape[1]).T + rand * torch.stack([max_range[:, 1] - max_range[:, 0]] * rand.shape[1]).T
+    min_rand = torch.stack([min_range[:, 0]] * rand.shape[1]).T + rand * torch.stack([min_range[:, 1] - min_range[:, 0]] * rand.shape[1]).T
+
+    max_rand = max_rand.reshape(grad_shape)
+    min_rand = min_rand.reshape(grad_shape)
+
+    deviation_dim = (deviation > 0).float() * max_rand + (deviation < 0).float() * min_rand
+    random_12 = 1. + torch.rand(size=grad_shape)
+    return deviation_dim * ((deviation * deviation_dim > 0).float() / random_12 + (deviation * deviation_dim < 0).float() * random_12)
+
 def fang_nn_parameters(dict_parameters, args):
     """
     generate fang parameters.
@@ -96,8 +130,20 @@ def fang_nn_parameters(dict_parameters, args):
     """
 
     args.get_logger().info("Averaging parameters on model fang attackers")
-    new_parameters = dict_parameters
+    new_parameters = {}
+    for client_idx in dict_parameters.keys():
+        if client_idx < args.get_num_workers()*(1-args.get_mal_prop()):
+            new_parameters[client_idx] = dict_parameters[client_idx]
+        else:
+            mal_param = {}
+            for name in dict_parameters[list(dict_parameters.keys())[0]].keys():
+                all_updates = []
 
+                for idx in dict_parameters.keys():
+                    all_updates.append(dict_parameters[idx][name])
+
+                mal_param[name] = fang_attack_on_one_layer(torch.stack(all_updates))
+            new_parameters[client_idx] = mal_param
 
     return new_parameters
 

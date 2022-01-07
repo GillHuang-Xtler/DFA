@@ -8,7 +8,7 @@ from federated_learning.datasets.data_distribution import distribute_batches_equ
 from federated_learning.datasets.data_distribution import distribute_batches_noniid_mal
 from federated_learning.utils import average_nn_parameters, fed_average_nn_parameters
 from federated_learning.utils.aggregation import krum_nn_parameters, multi_krum_nn_parameters, bulyan_nn_parameters, trmean_nn_parameters, median_nn_parameters, fgold_nn_parameters
-from federated_learning.utils.attack import reverse_nn_parameters, ndss_nn_parameters, reverse_last_parameters, lie_nn_parameters, free_nn_parameters,free_last_nn_parameters, free_rand_nn_parameters
+from federated_learning.utils.attack import reverse_nn_parameters, ndss_nn_parameters, reverse_last_parameters, lie_nn_parameters, free_nn_parameters,free_last_nn_parameters, free_rand_nn_parameters, fang_nn_parameters
 from federated_learning.utils import convert_distributed_data_into_numpy
 from federated_learning.utils import poison_data
 from federated_learning.utils import identify_random_elements, identify_random_elements_inc_49
@@ -80,6 +80,8 @@ def train_subset_of_clients(epoch, args, clients, poisoned_workers):
         dict_parameters = ndss_nn_parameters(dict_parameters, args)
     elif args.get_attack_strategy() == "lie":
         dict_parameters = lie_nn_parameters(dict_parameters, args)
+    elif args.get_attack_strategy() == "fang":
+        dict_parameters = fang_nn_parameters(dict_parameters, args)
     elif args.get_attack_strategy() == "freerider":
         dict_parameters = free_rand_nn_parameters(parameters, previous_weight, args)
         # dict_parameters = free_last_nn_parameters(parameters, previous_weight, args)

@@ -42,7 +42,7 @@ class Arguments:
         self.get_poison_effort = 'full'
         self.num_workers = 100
         self.aggregation = "mkrum"  # trmean, bulyan, mkrum, fedsgd
-        self.attack = "ndss"  # cua, ndss，lie
+        self.attack = "fang"  # cua, ndss, lie, fang
         # if self.attack == "cua2":
             # self.cua_version = "infer_class"  # "infer_class": generator(image) for training, "target_class": 0 for training
         # elif self.attack == "cua2":

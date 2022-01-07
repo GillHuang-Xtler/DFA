@@ -227,7 +227,7 @@ def run_exp(replacement_method, num_poisoned_workers, KWARGS, client_selection_s
     print(sum(select_attacker_nums))
     print(sum(all_worker_nums))
     print(sum(select_attacker_nums)/sum(all_worker_nums))
-    args.get_logger().info("random all attacker num is #{}, selected attacker num is #{} ", str(sum(all_worker_nums)), str(sum(select_attacker_nums)))
+    args.get_logger().info("random all attacker num is #{}, selected attacker num is #{}, best acc is #{} ", str(sum(all_worker_nums)), str(sum(select_attacker_nums)), str(max))
 
     save_results(results, args.get_dataset() + "_" + args.get_aggregation_method() + "_" +args.get_attack_strategy() + "_" +str(args.get_mal_prop()) + "_" + args.get_distribution_method() + "_" + str(args.get_beta())  + "_" + results_files[0] )
     save_results(worker_selection, args.get_dataset() + "_" + args.get_aggregation_method() + "_" +args.get_attack_strategy() + "_" +str(args.get_mal_prop()) + "_" + args.get_distribution_method() + "_" + str(args.get_beta()) + "_" + worker_selections_files[0])

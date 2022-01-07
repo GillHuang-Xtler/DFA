@@ -165,7 +165,7 @@ class Client:
         if (new_param is None) or (pre_param is None):
             return loss
 
-        mu = 0.01
+        mu = 0.02
         reg = torch.tensor(0.)
 
         for key in net_param.keys():
@@ -318,17 +318,21 @@ class Client:
                     # print("generator training loss: " + str(loss_gen))
                     # loss_gen.backward()
                     # self.cua_gen_optimizer.step()
-
+                    cnt = 0
                     # training the generator
-                    if epoch > 100:
-                        gen_epoch = 1
-                    else:
-                        gen_epoch = 20
-                    for gen_epoch in range(gen_epoch):
+                    for gen_epoch in range(5):
+                    # loss_gen = -999
+                    # while loss_gen < -0.01:
+                        cnt += 1
+                        self.args.get_logger().info("Train generator on #{} epoches", cnt)
                         loss_gen = - self.loss_function(outputs, labels)
                         print("generator training loss: " + str(loss_gen))
                         loss_gen.backward(retain_graph=True)
                         self.cua_gen_optimizer.step()
+                        # if loss_gen > -0.2:
+                        #     print(loss_gen)
+                        #     break
+
 
 
             elif self.args.get_cua_syn_data_version() == "layer":

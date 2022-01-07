@@ -77,7 +77,7 @@ def train_subset_of_clients(epoch, args, clients, poisoned_workers):
     elif args.get_attack_strategy() == "reverse_1":
         parameters = reverse_last_parameters(parameters, previous_weight, args)
     elif args.get_attack_strategy() == "ndss":
-        parameters = ndss_nn_parameters(parameters, args)
+        dict_parameters = ndss_nn_parameters(dict_parameters, args)
     elif args.get_attack_strategy() == "lie":
         dict_parameters = lie_nn_parameters(dict_parameters, args)
     elif args.get_attack_strategy() == "freerider":

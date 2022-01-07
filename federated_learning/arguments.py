@@ -41,8 +41,8 @@ class Arguments:
         self.epoch_save_end_suffix = "end"
         self.get_poison_effort = 'full'
         self.num_workers = 100
-        self.aggregation = "mkrum" # trmean, bulyan, mkrum, fedsgd
-        self.attack = "cua"
+        self.aggregation = "mkrum"  # trmean, bulyan, mkrum, fedsgd
+        self.attack = "ndss"  # cua, ndss，lie
         # if self.attack == "cua2":
             # self.cua_version = "infer_class"  # "infer_class": generator(image) for training, "target_class": 0 for training
         # elif self.attack == "cua2":
@@ -60,7 +60,7 @@ class Arguments:
         # self.lie_z_value = {1:0.68947, 2:0.68947, 3:0.69847, 5:0.7054, 8:0.71904,10:0.72575, 12:0.73891}
 
 
-        self.distribution_method = "noniid_dir"
+        self.distribution_method = "noniid_2"
 
         self.num_classes = 10
 

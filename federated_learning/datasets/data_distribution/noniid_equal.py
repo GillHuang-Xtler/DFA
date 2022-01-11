@@ -46,9 +46,9 @@ def distribute_batches_2_class(train_data_loader, num_workers, args):
     """
 
     args.get_logger().info("Distribute data non-iid in to 2 classes")
-    distributed_dataset = [[] for i in range(num_workers)]
+    distributed_dataset = [[] for i in range(int(num_workers * (1-args.get_mal_prop())))]
 
-    class_slot = num_workers / args.get_num_classes()
+    class_slot = int(num_workers * (1-args.get_mal_prop())) / args.get_num_classes()
     if class_slot - int(class_slot) > 0:
         args.get_logger().info("unmatched class and client number")
     else:
@@ -66,6 +66,10 @@ def distribute_batches_2_class(train_data_loader, num_workers, args):
                 rand_idx = random.randint(0, class_slot*2-1)
                 distributed_dataset[i*class_slot + rand_idx].append((data_1, target_1))
                 distributed_dataset[i*class_slot + rand_idx].append((data_2, target_2))
+
+    for i in range(int(num_workers * (1-args.get_mal_prop())), num_workers):
+        distributed_dataset.append(distributed_dataset[0])
+
     return distributed_dataset
 
 def distribute_batches_noniid_mal(benign_data_loader, malicious_data_loader, num_workers, args):
@@ -127,14 +131,13 @@ def distribute_batches_dirichlet(train_data_loader, num_workers, mal_prop, args)
 
     num_benign_workers = num_workers*(1-mal_prop)
 
-    min_size = 0
-    min_require_size = 10
+
     num_class = args.get_num_classes()
 
     # for benign users
     N = 5000
     # len(train_data_loader*args.get_batch_size()
-    print("N = " + str(len(train_data_loader)))
+    args.get_logger().info("total number for Dirichlet is #{}, with beta as #{}", N, args.get_beta())
     np.random.seed(2022)
 
     # while min_size < min_require_size:

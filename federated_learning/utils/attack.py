@@ -75,18 +75,9 @@ def lie_nn_parameters(dict_parameters, args):
                 mal_param[name] = mean_params[name].data + z_value * std_params[name].data
             new_parameters[client_idx] = mal_param
 
-    # mal_param = {}
-    # for name in dict_parameters[list(dict_parameters.keys())[0]].keys():
-    #     mal_param[name] = mean_params[name] + z_value * std_params[name]
-    #
-    # # [new_parameters[i+int(args.get_num_workers()*(1-args.get_mal_prop()))]] = mal_param for i in range(int(args.get_num_workers()*args.get_mal_prop()))]
-    # for i in range(int(args.get_num_workers()*args.get_mal_prop())):
-    #     new_parameters[ i+ int(args.get_num_workers()*0.1 * (1 - args.get_mal_prop()))] = mal_param
-
 
     return new_parameters
 
-### Multi-krum and Bulyan
 
 def fang_attack_on_one_layer(all_updates):
     """

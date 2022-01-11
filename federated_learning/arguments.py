@@ -42,12 +42,10 @@ class Arguments:
         self.get_poison_effort = 'full'
         self.num_workers = 100
         self.aggregation = "mkrum"  # trmean, bulyan, mkrum, fedsgd
-        self.attack = "fang"  # cua, ndss, lie, fang
-        # if self.attack == "cua2":
-            # self.cua_version = "infer_class"  # "infer_class": generator(image) for training, "target_class": 0 for training
-        # elif self.attack == "cua2":
-        self.cua_version = "target_class"  # target_class or infer_class
-        self.cua_syn_data_version = "generator"  # generator or layer
+        self.attack = "lie"  # cua, ndss, lie, fang
+
+        self.cua_version = "target_class"  # target_class, infer_class
+        self.cua_syn_data_version = "generator"  # generator, layer
 
         self.num_attackers = 0
         self.dev_type = 'sign'

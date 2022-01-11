@@ -155,6 +155,7 @@ class Client:
 
     def get_init_balanced_syn_images(self, gen_net, num_class=10, factor=1):
         num_total = 50
+        self.args.get_logger().info("the number of generated input is #{} ", num_total)
 
         noise = torch.randn(num_total, self.args.n_dim).cpu()
         x_query = gen_net(noise)
@@ -200,17 +201,15 @@ class Client:
             mal_dataset.append([input, predicted.data.squeeze(0)])
         noise_images_labels = generate_train_loader_mal(self.args, mal_dataset)
         return noise_images_labels
-    #
-    # def generate_noise_images(self, args, gen_net):
-    #     noise = torch.randn(5, args.n_dim)
-    #     noise_images = gen_net(noise)
-    #
-    #     return noise_images
+
 
     def get_mal_dataloader(self):
         gen_state_dict = self.gen_net.state_dict()
         gen_state_dict.update(self.net.state_dict())
         self.gen_net.load_state_dict(gen_state_dict)
+        image_num = 50
+        epoch_num = 20
+        self.args.get_logger().info("the number of generated input is #{}, training is for #{} local epochs ", image_num, epoch_num)
 
         loss = torch.nn.MSELoss()
 
@@ -226,9 +225,9 @@ class Client:
             counter += 1
         optimizer = optim.SGD(self.gen_net.parameters(), lr=0.01, momentum=0.9)
         mal_dataset = []
-        for j in range(50):
+        for j in range(image_num):
             single_data_copy = torch.rand(1, 1, 38, 38)
-            for i in range(200):
+            for i in range(epoch_num):
                 optimizer.zero_grad()
                 # forward + backward + optimize
                 outputs, x0 = self.gen_net(single_data_copy)
@@ -289,7 +288,7 @@ class Client:
                 self.save_model(epoch, self.args.get_epoch_save_start_suffix())
 
             if self.args.get_cua_syn_data_version() == "generator":
-                print("cua synthetic data version: generator")
+                self.args.get_logger().info("cua synthetic data version: generator")
                 noise_images = self.get_init_balanced_syn_images(self.gen_net, num_class=10, factor=1)
                 mal_data_loader = self.inference_global_model(noise_images = noise_images)
 
@@ -314,24 +313,15 @@ class Client:
                     loss.backward(retain_graph=True)
                     self.optimizer.step()
 
-                    # loss_gen = - self.loss_function(outputs, labels)
-                    # print("generator training loss: " + str(loss_gen))
-                    # loss_gen.backward()
-                    # self.cua_gen_optimizer.step()
-                    cnt = 0
+
+                    cnt = 5
                     # training the generator
-                    for gen_epoch in range(5):
-                    # loss_gen = -999
-                    # while loss_gen < -0.01:
-                        cnt += 1
+                    for gen_epoch in range(cnt):
                         self.args.get_logger().info("Train generator on #{} epoches", cnt)
                         loss_gen = - self.loss_function(outputs, labels)
-                        print("generator training loss: " + str(loss_gen))
+                        self.args.get_logger().info("loss on training local generator is #{} ", loss_gen)
                         loss_gen.backward(retain_graph=True)
                         self.cua_gen_optimizer.step()
-                        # if loss_gen > -0.2:
-                        #     print(loss_gen)
-                        #     break
 
 
 

@@ -100,7 +100,6 @@ def train_subset_of_clients(epoch, args, clients, poisoned_workers):
     elif args.get_aggregation_method() == "mkrum":
         new_nn_params, selected_idx = multi_krum_nn_parameters(dict_parameters, previous_weight, args)
     elif args.get_aggregation_method() == "bulyan":
-        # dict_parameters = {client_idx: clients[client_idx].get_nn_parameters() for client_idx in random_workers}
         new_nn_params, selected_idx = bulyan_nn_parameters(dict_parameters, args)
     elif args.get_aggregation_method() == "trmean":
         new_nn_params = trmean_nn_parameters(list(dict_parameters.values()), args)
@@ -116,11 +115,14 @@ def train_subset_of_clients(epoch, args, clients, poisoned_workers):
 
     all = 0
     select = 0
-    for i in random_workers:
-        if i > 80:
-            all += 1
-        if i > 80 and i in selected_idx:
-            select += 1
+
+    if args.get_aggregation_method() in ["mkrum", "krum", "bulyan"]:
+
+        for i in random_workers:
+            if i > 80:
+                all += 1
+            if i > 80 and i in selected_idx:
+                select += 1
 
     return clients[0].test(), random_workers, all, select
 

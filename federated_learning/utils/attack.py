@@ -133,7 +133,14 @@ def fang_nn_parameters(dict_parameters, args):
                 for idx in dict_parameters.keys():
                     all_updates.append(dict_parameters[idx][name])
 
+                # if name == "bn1.num_batches_tracked":
+                #     print(all_updates[0].shape)
+
                 mal_param[name] = fang_attack_on_one_layer(torch.stack(all_updates))
+                # if name == "bn1.num_batches_tracked":
+                    # print(mal_param[name].shape)
+                if "num_batches_tracked" in name:
+                    mal_param[name] = mal_param[name][0]
             new_parameters[client_idx] = mal_param
 
     return new_parameters

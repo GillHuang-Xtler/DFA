@@ -147,6 +147,7 @@ def median_nn_parameters(parameters, args):
         tmp = []
         for param in parameters:
             tmp.append(param[name].data.float())
+            print(param[name].data.float().shape)
         median_data = torch.median(torch.stack(tmp), 0)[0]
         new_params[name] = median_data
 

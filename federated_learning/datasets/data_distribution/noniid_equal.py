@@ -156,6 +156,7 @@ def distribute_batches_dirichlet(train_data_loader, num_workers, mal_prop, args)
         proportions = proportions / proportions.sum()
         proportions = (np.cumsum(proportions) * len(dataset)).astype(int)[:-1]
         idx_batch = [idx_j + idx.tolist() for idx_j, idx in zip(idx_batch, np.split(dataset, proportions))]
+        print(len(dataset), len(proportions))
 
     for j in range(len(idx_batch)):
         distributed_dataset[j] = idx_batch[j]

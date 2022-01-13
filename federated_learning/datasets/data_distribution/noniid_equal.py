@@ -130,6 +130,7 @@ def distribute_batches_dirichlet(train_data_loader, num_workers, mal_prop, args)
     beta = args.get_beta()
 
     num_benign_workers = num_workers*(1-mal_prop)
+    num_distribution_limit =  num_workers*(1-mal_prop) / args.get_num_classes()
 
 
     num_class = args.get_num_classes()
@@ -141,7 +142,8 @@ def distribute_batches_dirichlet(train_data_loader, num_workers, mal_prop, args)
     np.random.seed(2022)
 
     # while min_size < min_require_size:
-    idx_batch = [[] for i in range(int(num_benign_workers))]
+    data_batch = []
+    idx_batch = [[] for i in range(int(num_distribution_limit))]
     for i in range(num_class):
         dataset = []
         for batch_idx, (data, target) in enumerate(train_data_loader):
@@ -151,17 +153,23 @@ def distribute_batches_dirichlet(train_data_loader, num_workers, mal_prop, args)
             if len(target_r) >0:
                 dataset.append((data_r,target_r))
         dataset = dataset[:int(N/args.get_num_classes())]
-        proportions = np.random.dirichlet(np.repeat(beta, num_benign_workers))
-        proportions = np.array([p * (len(idx_j) < N / num_benign_workers) for p, idx_j in zip(proportions, idx_batch)])
+        proportions = np.random.dirichlet(np.repeat(beta, num_distribution_limit))
+        proportions = np.array([p * (len(idx_j) < N / num_distribution_limit) for p, idx_j in zip(proportions, idx_batch)])
         proportions = proportions / proportions.sum()
         proportions = (np.cumsum(proportions) * len(dataset)).astype(int)[:-1]
-        idx_batch = [idx_j + idx.tolist() for idx_j, idx in zip(idx_batch, np.split(dataset, proportions))]
-        print(len(dataset), len(proportions))
+        data_batch += [idx_j + idx.tolist() for idx_j, idx in zip(idx_batch, np.split(dataset, proportions))]
+        # print(len(data_batch))
+        # print(len(data_batch), len(idx_batch))
 
-    for j in range(len(idx_batch)):
-        distributed_dataset[j] = idx_batch[j]
 
-    for j in range(len(idx_batch),num_workers):
-        distributed_dataset[j] = idx_batch[0]
+    for j in range(len(data_batch)):
+        distributed_dataset[j] = data_batch[j]
+
+    for j in range(len(data_batch),num_workers):
+        distributed_dataset[j] = data_batch[len(data_batch)-1]
+
+    for j in range(len(distributed_dataset)):
+        if len(distributed_dataset[j]) == 0:
+            distributed_dataset[j] = data_batch[len(data_batch)-1]
 
     return distributed_dataset

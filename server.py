@@ -203,7 +203,7 @@ def run_exp(replacement_method, num_poisoned_workers, KWARGS, client_selection_s
     if args.get_distribution_method() == "noniid_2":
         distributed_train_dataset = distribute_batches_2_class(train_data_loader, args.get_num_workers(), args = args)
     elif args.get_distribution_method() == "noniid_dir":
-        distributed_train_dataset = distribute_batches_dirichlet(train_data_loader, args.get_num_workers(), args.get_mal_prop(), args = args)
+        distributed_train_dataset = distribute_batches_dirichlet(train_data_loader, args.get_num_workers(), args.get_mal_prop(), args = args, type=1)
 
     # elif args.get_distribution_method() == "noniid_mal":
     #     distributed_train_dataset = distribute_batches_noniid_mal(benign_data_loader, malicious_data_loader, args.get_num_workers(), args = args)

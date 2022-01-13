@@ -115,7 +115,78 @@ def distribute_batches_noniid_mal(benign_data_loader, malicious_data_loader, num
 
     return distributed_dataset
 
-def distribute_batches_dirichlet(train_data_loader, num_workers, mal_prop, args):
+
+def distribute_batches_dirichlet(train_data_loader, num_workers, mal_prop, args, type=0):
+    if type == 0:
+        return distribute_batches_dirichlet_type0(train_data_loader, num_workers, mal_prop, args)
+    elif type == 1 or type == 2:
+        return distribute_batches_dirichlet_new(train_data_loader, num_workers, mal_prop, args, type)
+    else:
+        print("Type number error.")
+
+
+def get_client_list(class_idx, num_workers, mal_prop, args, type):
+    num_benign_workers = int(num_workers * (1 - mal_prop))
+    if type == 1:
+        idx_shift = int(num_benign_workers / args.get_num_classes())
+        num_client_per_class = idx_shift * 2
+        start_idx = class_idx * idx_shift
+        end_idx = start_idx + num_client_per_class
+        if end_idx > num_benign_workers:
+            end_idx = num_benign_workers
+        res = [i for i in range(start_idx, end_idx)]
+    elif type == 2:
+        idx_shift = int(num_benign_workers / args.get_num_classes())
+        num_client_per_class = idx_shift * 2
+        res = random.sample(range(num_benign_workers), num_client_per_class)
+    else:
+        res = []
+    return res
+
+
+def distribute_batches_dirichlet_new(train_data_loader, num_workers, mal_prop, args, type):
+    args.get_logger().info("Distribute data non-iid in Dirichlet distribution")
+    args.get_logger().info("type:1")
+
+    distributed_dataset = [[] for i in range(num_workers)]
+    beta = args.get_beta()
+
+    num_class = args.get_num_classes()
+
+    # for benign users
+    N = 5000
+    # len(train_data_loader*args.get_batch_size()
+    args.get_logger().info("total number for Dirichlet is #{}, with beta as #{}", N, args.get_beta())
+    np.random.seed(2022)
+
+    dataset = None
+    for i in range(num_class):
+        dataset = []
+        for batch_idx, (data, target) in enumerate(train_data_loader):
+            reduce = (target == i).nonzero()
+            target_r = torch.index_select(target, 0, reduce.view(-1))
+            data_r = torch.index_select(data, 0, reduce.view(-1))
+            if len(target_r) > 0:
+                for j in range(len(target_r)):
+                    dataset.append((data_r[j:j + 1], target_r[j:j + 1]))
+        dataset = dataset[:int(N / args.get_num_classes())]
+        client_list = get_client_list(i, num_workers, mal_prop, args, type)
+        proportions = np.random.dirichlet(np.repeat(beta, len(client_list)))
+        proportions = (np.cumsum(proportions) * len(dataset)).astype(int)[:-1]
+        temp = np.split(dataset, proportions)
+        for ii in range(len(temp)):
+            distributed_dataset[client_list[ii]] += temp[ii].tolist()
+
+    # sum = 0
+    for j in range(len(distributed_dataset)):
+        if len(distributed_dataset[j]) == 0:
+            distributed_dataset[j].append(dataset[0])
+        # sum += len(distributed_dataset[j])
+    # print("total num of samples!!!!!!!!:", sum)
+    return distributed_dataset
+
+
+def distribute_batches_dirichlet_type0(train_data_loader, num_workers, mal_prop, args):
     """
     Gives each worker the same number of batches of training data and one user only have two class except the malicious.
 
@@ -126,12 +197,13 @@ def distribute_batches_dirichlet(train_data_loader, num_workers, mal_prop, args)
     """
 
     args.get_logger().info("Distribute data non-iid in Dirichlet distribution")
+    args.get_logger().info("type:0")
+
     distributed_dataset = [[] for i in range(num_workers)]
     beta = args.get_beta()
 
     num_benign_workers = num_workers*(1-mal_prop)
     num_distribution_limit =  num_workers*(1-mal_prop) / args.get_num_classes()
-
 
     num_class = args.get_num_classes()
 
@@ -150,8 +222,10 @@ def distribute_batches_dirichlet(train_data_loader, num_workers, mal_prop, args)
             reduce = (target == i).nonzero()
             target_r = torch.index_select(target, 0, reduce.view(-1))
             data_r = torch.index_select(data, 0, reduce.view(-1))
-            if len(target_r) >0:
-                dataset.append((data_r,target_r))
+            if len(target_r) > 0:
+                # print(len(target_r), type(data_r), data_r.shape, target_r.shape)
+                for j in range(len(target_r)):
+                    dataset.append((data_r[j:j+1], target_r[j:j+1]))
         dataset = dataset[:int(N/args.get_num_classes())]
         proportions = np.random.dirichlet(np.repeat(beta, num_distribution_limit))
         proportions = np.array([p * (len(idx_j) < N / num_distribution_limit) for p, idx_j in zip(proportions, idx_batch)])

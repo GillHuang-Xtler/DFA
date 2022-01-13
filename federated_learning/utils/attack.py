@@ -52,31 +52,40 @@ def lie_nn_parameters(dict_parameters, args):
     :param parameters: nn model named parameters
     :type parameters: list
     """
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    args.get_logger().info("Doing NDSS attackers (using in server.py, writing in attack.py)")
 
     z_value = args.get_lie_z_value()
     mean_params = {}
     std_params = {}
     for name in dict_parameters[list(dict_parameters.keys())[0]].keys():
-        mean_params[name] = sum([param[name].data for param in dict_parameters.values()])/len(dict_parameters.values())
+
+        # mean_params[name] = sum([param[name].data for param in dict_parameters.values()]).data/len(dict_parameters.values())
+
+        mean_params[name] = torch.Tensor([0]).float().to(device)
+        for key in dict_parameters.keys():
+            mean_params[name] = mean_params[name].data + dict_parameters[key][name].data
+        mean_params[name] = mean_params[name].data / len(dict_parameters.keys())
+
         _std_params = []
         for param in dict_parameters.values():
             _std_params.append(param[name].data)
-        val = torch.stack(_std_params)
-        std_params[name] = torch.std(val.float())
+        val = torch.stack(_std_params).data
+        std_params[name] = torch.std(val.float(), 0).data
+
+    # mean_dis = model_distance(mean_params, dict_parameters[list(dict_parameters.keys())[0]])
+    # print("lie mean dis:", mean_dis)
 
     args.get_logger().info("Averaging parameters on model lie attackers")
-    new_parameters = {}
+
     for client_idx in dict_parameters.keys():
-        if client_idx < args.get_num_workers()*(1-args.get_mal_prop()):
-            new_parameters[client_idx] = dict_parameters[client_idx]
-        else:
+        if client_idx >= args.get_num_workers() * (1 - args.get_mal_prop()):
             mal_param = {}
-            for name in dict_parameters[list(dict_parameters.keys())[0]].keys():
+            for name in dict_parameters[client_idx].keys():
                 mal_param[name] = mean_params[name].data + z_value * std_params[name].data
-            new_parameters[client_idx] = mal_param
+            dict_parameters[client_idx] = mal_param
 
-
-    return new_parameters
+    return dict_parameters
 
 
 def fang_attack_on_one_layer(all_updates):

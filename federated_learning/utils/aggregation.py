@@ -19,8 +19,12 @@ def multi_krum_nn_parameters(dict_parameters, previous_weight, args):
     for idx, parameter in dict_parameters.items():
         distance = []
         for _idx, _parameter in dict_parameters.items():
-            dis = [torch.norm((_parameter[name].data - parameter[name].data).float()) for name in parameter.keys()]
-            distance.append(sum(dis))
+
+            dis = 0
+            for key in parameter.keys():
+                dis = dis + (torch.norm(_parameter[key].float() - parameter[key].float()) ** 2)
+            distance.append(dis)
+
             # pre_distance.append(sum(pre_dis))
             tmp_parameters[idx] = parameter
         # pre_dis = [torch.norm((_parameter[name].data - previous_weight[name].data).float()) for name in parameter.keys()]

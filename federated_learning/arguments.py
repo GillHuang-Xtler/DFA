@@ -21,7 +21,7 @@ class Arguments:
     def __init__(self, logger):
         self.logger = logger
 
-        self.dataset = "cifar_10"  # "cifar_10" "fashion_mnist"
+        self.dataset = "fashion_mnist"  # "cifar_10" "fashion_mnist"
         self.batch_size = 10
         self.test_batch_size = 1000
         self.epochs = 100
@@ -41,8 +41,8 @@ class Arguments:
         self.epoch_save_end_suffix = "end"
         self.get_poison_effort = 'full'
         self.num_workers = 100
-        self.aggregation = "median"  # trmean, bulyan, mkrum, fedsgd
-        self.attack = "fang"  # cua, ndss, lie, fang
+        self.aggregation = "mkrum"  # trmean, bulyan, mkrum, fedsgd
+        self.attack = "lie"  # cua, ndss, lie, fang
 
         self.cua_version = "target_class"  # target_class, infer_class
         self.cua_syn_data_version = "generator"  # generator, layer

@@ -146,7 +146,7 @@ def get_client_list(class_idx, num_workers, mal_prop, args, type):
 
 def distribute_batches_dirichlet_new(train_data_loader, num_workers, mal_prop, args, type):
     args.get_logger().info("Distribute data non-iid in Dirichlet distribution")
-    args.get_logger().info("type:1")
+    args.get_logger().info("type: #{}", type)
 
     distributed_dataset = [[] for i in range(num_workers)]
     beta = args.get_beta()
@@ -197,7 +197,7 @@ def distribute_batches_dirichlet_type0(train_data_loader, num_workers, mal_prop,
     """
 
     args.get_logger().info("Distribute data non-iid in Dirichlet distribution")
-    args.get_logger().info("type:0")
+    args.get_logger().info("type: 0")
 
     distributed_dataset = [[] for i in range(num_workers)]
     beta = args.get_beta()

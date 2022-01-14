@@ -41,8 +41,9 @@ class Arguments:
         self.epoch_save_end_suffix = "end"
         self.get_poison_effort = 'full'
         self.num_workers = 100
-        self.aggregation = "mkrum"  # trmean, bulyan, mkrum, fedsgd
+        self.aggregation = "trmean"  # trmean, bulyan, mkrum, fedsgd
         self.attack = "ndss"  # cua, ndss, lie, fang
+        self.ndss_deviation_type = "sign"  # std, sign
 
         self.cua_version = "target_class"  # target_class, infer_class
         self.cua_syn_data_version = "generator"  # generator, layer
@@ -136,6 +137,9 @@ class Arguments:
         self.default_model_folder_path = "default_models"
 
         self.data_path = "data"
+
+    def get_ndss_deviation_type(self):
+        return self.ndss_deviation_type
 
     def get_cua_version(self):
         return self.cua_version

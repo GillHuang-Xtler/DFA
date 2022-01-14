@@ -41,7 +41,7 @@ class Arguments:
         self.epoch_save_end_suffix = "end"
         self.get_poison_effort = 'full'
         self.num_workers = 100
-        self.aggregation = "mkrum"  # trmean, bulyan, mkrum, fedsgd
+        self.aggregation = "trmean"  # trmean, bulyan, mkrum, fedsgd
         self.attack = "lie"  # cua, ndss, lie, fang
 
         self.cua_version = "target_class"  # target_class, infer_class
@@ -52,7 +52,7 @@ class Arguments:
         self.mal_prop = 0.2
         self.num_reverse_layers = 3
         # self.num_poisoned_workers = 10
-        self.lie_z_value = 1.5
+        self.lie_z_value = 0.2
         self.n_dim = 128
         # self.lie_z_value = {1:0.68947, 2:0.68947, 3:0.69847, 5:0.7054, 8:0.71904,10:0.72575, 12:0.73891}
 

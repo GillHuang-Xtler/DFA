@@ -41,7 +41,7 @@ class Arguments:
         self.epoch_save_end_suffix = "end"
         self.get_poison_effort = 'full'
         self.num_workers = 100
-        self.aggregation = "trmean"  # trmean, bulyan, mkrum, fedsgd
+        self.aggregation = "median"  # trmean, bulyan, mkrum, fedsgd, median
         self.attack = "ndss"  # cua, ndss, lie, fang
         self.ndss_deviation_type = "sign"  # std, sign
 

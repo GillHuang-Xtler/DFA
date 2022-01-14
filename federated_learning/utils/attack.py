@@ -166,7 +166,7 @@ def model_distance(m1_params, m2_params):
     return distance
 
 
-def get_deviation_and_model_avg(dict_parameters, normal_idx_list):
+def get_deviation_and_model_avg(dict_parameters, normal_idx_list, deviation_type="unit_vec"):
     """
     for ndss_nn_parameters
     """

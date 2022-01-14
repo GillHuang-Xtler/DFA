@@ -42,7 +42,7 @@ class Arguments:
         self.get_poison_effort = 'full'
         self.num_workers = 100
         self.aggregation = "mkrum"  # trmean, bulyan, mkrum, fedsgd
-        self.attack = "lie"  # cua, ndss, lie, fang
+        self.attack = "ndss"  # cua, ndss, lie, fang
 
         self.cua_version = "target_class"  # target_class, infer_class
         self.cua_syn_data_version = "generator"  # generator, layer

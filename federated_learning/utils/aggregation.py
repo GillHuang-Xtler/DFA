@@ -127,6 +127,8 @@ def trmean_nn_parameters(parameters, args):
         tmp = []
         for param in parameters:
             tmp.append(param[name].data.long())
+        # print(name)
+        # print(tmp)
         max_data = torch.max(torch.stack(tmp), 0)[0]
         min_data = torch.min(torch.stack(tmp), 0)[0]
         # print(type(min_data))

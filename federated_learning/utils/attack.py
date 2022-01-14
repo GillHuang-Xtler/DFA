@@ -83,6 +83,8 @@ def lie_nn_parameters(dict_parameters, args):
             mal_param = {}
             for name in dict_parameters[client_idx].keys():
                 mal_param[name] = mean_params[name].data + z_value * std_params[name].data
+                if "num_batches_tracked" in name:
+                    mal_param[name] = mal_param[name][0]
             dict_parameters[client_idx] = mal_param
 
     return dict_parameters
@@ -166,7 +168,7 @@ def model_distance(m1_params, m2_params):
     return distance
 
 
-def get_deviation_and_model_avg(dict_parameters, normal_idx_list):
+def get_deviation_and_model_avg(dict_parameters, normal_idx_list, deviation_type):
     """
     for ndss_nn_parameters
     """
@@ -180,9 +182,21 @@ def get_deviation_and_model_avg(dict_parameters, normal_idx_list):
                 model_avg[key] = client_param[key]
     deviation = {}
 
+    print("deviation_type!!!:", deviation_type)
+
     for key in model_avg.keys():
         model_avg[key] = model_avg[key].data / len(normal_idx_list)
-        deviation[key] = torch.sign(model_avg[key])
+        if deviation_type == "sign":
+            deviation[key] = torch.sign(model_avg[key])
+
+    if deviation_type == "std":
+        for key in model_avg.keys():
+            _std_params = []
+            for param in dict_parameters.values():
+                _std_params.append(param[key].data)
+            val = torch.stack(_std_params).data
+            deviation[key] = torch.std(val.float(), 0).data
+
     return model_avg, deviation
 
 
@@ -242,7 +256,7 @@ def ndss_nn_parameters(dict_parameters, args):
                 upper_bound = dis
     print("upper bound is:", upper_bound)
 
-    model_avg, deviation = get_deviation_and_model_avg(dict_parameters, normal_idx_list)
+    model_avg, deviation = get_deviation_and_model_avg(dict_parameters, normal_idx_list, args.get_ndss_deviation_type())
 
     for client_idx in dict_parameters.keys():
         if client_idx >= args.get_num_workers() * (1 - args.get_mal_prop()):
@@ -266,6 +280,10 @@ def ndss_nn_parameters(dict_parameters, args):
                 lamda_fail = lamda_fail / 2
 
             mal_model = get_malicious_model(model_avg, lamda_succ, deviation)
+            for name in mal_model.keys():
+                if "num_batches_tracked" in name:
+                    mal_model[name] = mal_model[name][0]
+
             dict_parameters[client_idx] = mal_model
 
     return dict_parameters

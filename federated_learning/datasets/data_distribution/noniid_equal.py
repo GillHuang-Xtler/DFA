@@ -157,7 +157,8 @@ def distribute_batches_dirichlet_new(train_data_loader, num_workers, mal_prop, a
     N = 5000
     # len(train_data_loader*args.get_batch_size()
     args.get_logger().info("total number for Dirichlet is #{}, with beta as #{}", N, args.get_beta())
-    np.random.seed(2022)
+    np.random.seed(20220114)
+    random.seed(20220114)
 
     dataset = None
     for i in range(num_class):

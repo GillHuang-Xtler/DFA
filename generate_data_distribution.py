@@ -52,13 +52,7 @@ if __name__ == '__main__':
 
     train_data_loader = generate_train_loader(args, dataset)
     test_data_loader = generate_test_loader(args, dataset)
-# <<<<<<< HEAD
-# =======
-#
-#     # benign_data_loader = generate_benign_loader(args, dataset)
-#     # malicious_data_loader = generate_malicious_loader(args, dataset)
-#     # free_data_loader = generate_free_loader(args, dataset)
-# >>>>>>> d2b6e206627f633354e9758d9e47a2e67072d369
+
 
 
     with open(TRAIN_DATA_LOADER_FILE_PATH, "wb") as f:
@@ -67,17 +61,7 @@ if __name__ == '__main__':
     with open(TEST_DATA_LOADER_FILE_PATH, "wb") as f:
         save_data_loader_to_file(test_data_loader, f)
 
-# <<<<<<< HEAD
-# =======
-#     # with open(BENIGN_DATA_LOADER_FILE_PATH, "wb") as f:
-#     #     save_data_loader_to_file(benign_data_loader, f)
-#     #
-#     # with open(MALICIOUS_DATA_LOADER_FILE_PATH, "wb") as f:
-#     #     save_data_loader_to_file(malicious_data_loader, f)
-#     #
-#     # with open(FREE_DATA_LOADER_FILE_PATH, "wb") as f:
-#     #     save_data_loader_to_file(free_data_loader, f)
-# >>>>>>> d2b6e206627f633354e9758d9e47a2e67072d369
+
 
     # ---------------------------------
     # ------------ MNIST --------------

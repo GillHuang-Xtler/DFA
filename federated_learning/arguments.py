@@ -21,7 +21,7 @@ class Arguments:
     def __init__(self, logger):
         self.logger = logger
 
-        self.dataset = "cifar_10"  # "cifar_10" "fashion_mnist"
+        self.dataset = "fashion_mnist"  # "cifar_10" "fashion_mnist"
         self.batch_size = 10
         self.test_batch_size = 1000
         self.epochs = 100
@@ -41,7 +41,7 @@ class Arguments:
         self.epoch_save_end_suffix = "end"
         self.get_poison_effort = 'full'
         self.num_workers = 100
-        self.aggregation = "median"  # trmean, bulyan, mkrum, fedsgd, median
+        self.aggregation = "mkrum"  # trmean, bulyan, mkrum, fedsgd, median
         self.attack = "ndss"  # cua, ndss, lie, fang, none
         self.ndss_deviation_type = "sign"  # std, sign
 
@@ -56,8 +56,8 @@ class Arguments:
         self.n_dim = 128
         # self.lie_z_value = {1:0.68947, 2:0.68947, 3:0.69847, 5:0.7054, 8:0.71904,10:0.72575, 12:0.73891}
 
-        self.beta = 0.5
-        self.distribution_method = "noniid_1"
+        self.beta = 0.1
+        self.distribution_method = "noniid_dir_2"
 
         self.num_classes = 10
 
@@ -142,6 +142,9 @@ class Arguments:
         self.default_model_folder_path = "default_models"
 
         self.data_path = "data"
+
+    def get_dataset(self):
+        return self.dataset
 
     def get_ndss_deviation_type(self):
         return self.ndss_deviation_type

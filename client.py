@@ -154,7 +154,7 @@ class Client:
         return len(self.distributed_train_dataset[1])
 
     def get_init_balanced_syn_images(self, gen_net, num_class=10, factor=1):
-        num_total = 50
+        num_total = self.args.generator_image_num
         self.args.get_logger().info("the number of generated input is #{} ", num_total)
 
         noise = torch.randn(num_total, self.args.n_dim).cpu()
@@ -207,8 +207,8 @@ class Client:
         gen_state_dict = self.gen_net.state_dict()
         gen_state_dict.update(self.net.state_dict())
         self.gen_net.load_state_dict(gen_state_dict)
-        image_num = 50
-        epoch_num = 20
+        image_num = self.args.layer_image_num
+        epoch_num = self.args.layer_image_epoch
         self.args.get_logger().info("the number of generated input is #{}, training is for #{} local epochs ", image_num, epoch_num)
 
         loss = torch.nn.MSELoss()

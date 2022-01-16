@@ -72,6 +72,10 @@ class Arguments:
             self.scheduler_gamma = 0.5
             self.min_lr = 1e-10
             self.N = 50000
+            self.generator_image_num = 150
+            self.generator_local_epoch = 10
+            self.layer_image_num = 50
+            self.layer_image_epoch = 20
 
             self.train_data_loader_pickle_path = "data_loaders/cifar10/train_data_loader.pickle"
             self.test_data_loader_pickle_path = "data_loaders/cifar10/test_data_loader.pickle"
@@ -85,6 +89,10 @@ class Arguments:
             self.scheduler_gamma = 0.1
             self.min_lr = 1e-10
             self.N = 5000
+            self.generator_image_num = 50
+            self.generator_local_epoch = 5
+            self.layer_image_num = 20
+            self.layer_image_epoch = 10
 
             self.train_data_loader_pickle_path = "data_loaders/mnist/train_data_loader.pickle"
             self.test_data_loader_pickle_path = "data_loaders/mnist/test_data_loader.pickle"
@@ -99,6 +107,10 @@ class Arguments:
             self.scheduler_gamma = 0.1
             self.min_lr = 1e-10
             self.N = 5000
+            self.generator_image_num = 50
+            self.generator_local_epoch = 5
+            self.layer_image_num = 20
+            self.layer_image_epoch = 10
 
             self.train_data_loader_pickle_path = "data_loaders/fashion-mnist/train_data_loader.pickle"
             self.test_data_loader_pickle_path = "data_loaders/fashion-mnist/test_data_loader.pickle"

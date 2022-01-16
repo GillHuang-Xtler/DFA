@@ -57,7 +57,7 @@ class Arguments:
         # self.lie_z_value = {1:0.68947, 2:0.68947, 3:0.69847, 5:0.7054, 8:0.71904,10:0.72575, 12:0.73891}
 
         self.beta = 0.5
-        self.distribution_method = "noniid_dir_2"
+        self.distribution_method = "noniid_1"
 
         self.num_classes = 10
 
@@ -76,6 +76,7 @@ class Arguments:
             self.generator_local_epoch = 10
             self.layer_image_num = 50
             self.layer_image_epoch = 20
+            self.reduce = 1
 
             self.train_data_loader_pickle_path = "data_loaders/cifar10/train_data_loader.pickle"
             self.test_data_loader_pickle_path = "data_loaders/cifar10/test_data_loader.pickle"
@@ -93,6 +94,8 @@ class Arguments:
             self.generator_local_epoch = 5
             self.layer_image_num = 20
             self.layer_image_epoch = 10
+            self.reduce = 0.1
+
 
             self.train_data_loader_pickle_path = "data_loaders/mnist/train_data_loader.pickle"
             self.test_data_loader_pickle_path = "data_loaders/mnist/test_data_loader.pickle"
@@ -111,23 +114,12 @@ class Arguments:
             self.generator_local_epoch = 5
             self.layer_image_num = 20
             self.layer_image_epoch = 10
+            self.reduce = 0.1
 
             self.train_data_loader_pickle_path = "data_loaders/fashion-mnist/train_data_loader.pickle"
             self.test_data_loader_pickle_path = "data_loaders/fashion-mnist/test_data_loader.pickle"
             self.benign_data_loader_pickle_path = "data_loaders/fashion-mnist/benign_data_loader.pickle"
             self.malicious_data_loader_pickle_path = "data_loaders/fashion-mnist/malicious_data_loader.pickle"
-
-        elif self.dataset == "fashion_mnist_sample":
-            self.net = FashionMNISTCNN
-
-            self.lr = 0.001
-            self.momentum = 0.9
-            self.scheduler_step_size = 10
-            self.scheduler_gamma = 0.1
-            self.min_lr = 1e-10
-
-            self.train_data_loader_pickle_path = "data_loaders/fashion-mnist-sample/train_data_loader.pickle"
-            self.test_data_loader_pickle_path = "data_loaders/fashion-mnist-sample/test_data_loader.pickle"
 
         elif self.dataset == "cifar_100":
             self.net = Cifar100ResNet

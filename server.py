@@ -43,14 +43,7 @@ def train_subset_of_clients(epoch, args, clients, poisoned_workers):
     """
     kwargs = args.get_round_worker_selection_strategy_kwargs()
     kwargs["current_epoch_number"] = epoch
-    #
-    # if args.get_num_attackers() > 0:
-    #     random_workers = args.get_round_worker_selection_strategy().select_round_workers(
-    #         list(range(args.get_num_workers())),
-    #         poisoned_workers,
-    #         kwargs)
 
-    # else:
     random_workers = args.get_round_worker_selection_strategy().select_round_workers(args,
         list(range(args.get_num_workers())),
         poisoned_workers,
@@ -197,9 +190,9 @@ def run_exp(replacement_method, num_poisoned_workers, KWARGS, client_selection_s
     #     distributed_train_dataset = distribute_batches_bias(train_data_loader, args.get_num_workers())
     # elif args.get_distribution_method() == "iid":
     #     distributed_train_dataset = distribute_batches_equally(train_data_loader, args.get_num_workers())
-    # elif args.get_distribution_method() == "noniid_1":
-    #     distributed_train_dataset = distribute_batches_1_class(train_data_loader, args.get_num_workers(), args = args)
-    if args.get_distribution_method() == "noniid_2":
+    if args.get_distribution_method() == "noniid_1":
+        distributed_train_dataset = distribute_batches_1_class(train_data_loader, args.get_num_workers(), args = args)
+    elif args.get_distribution_method() == "noniid_2":
         distributed_train_dataset = distribute_batches_2_class(train_data_loader, args.get_num_workers(), args = args)
     elif args.get_distribution_method() == "noniid_dir_0":
         distributed_train_dataset = distribute_batches_dirichlet(train_data_loader, args.get_num_workers(), args.get_mal_prop(), args = args, type=0)

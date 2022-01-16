@@ -15,9 +15,9 @@ def distribute_batches_1_class(train_data_loader, num_workers, args):
     """
 
     args.get_logger().info("Distribute data non-iid in to 1 class")
-    distributed_dataset = [[] for i in range(num_workers)]
+    distributed_dataset = [[] for i in range(int(num_workers * (1-args.get_mal_prop())))]
 
-    class_slot = num_workers / args.get_num_classes()
+    class_slot = int(num_workers * (1-args.get_mal_prop())) / args.get_num_classes()
     if class_slot - int(class_slot) > 0:
         args.get_logger().info("unmatched class and client number")
     else:
@@ -26,11 +26,22 @@ def distribute_batches_1_class(train_data_loader, num_workers, args):
 
     for i in range(args.get_num_classes()):
         for batch_idx, (data, target) in enumerate(train_data_loader):
-            reduce = (target == i).nonzero()
-            target_r = torch.index_select(target, 0, reduce.view(-1))
-            data_r = torch.index_select(data, 0, reduce.view(-1))
-            rand_idx = random.randint(0, class_slot-1)
-            distributed_dataset[i*class_slot + rand_idx].append((data_r, target_r))
+            if args.reduce == 0.1:
+                if batch_idx < 1000:
+                    reduce = (target == i).nonzero()
+                    target_r = torch.index_select(target, 0, reduce.view(-1))
+                    data_r = torch.index_select(data, 0, reduce.view(-1))
+                    rand_idx = random.randint(0, class_slot-1)
+                    distributed_dataset[i*class_slot + rand_idx].append((data_r, target_r))
+            else:
+                reduce = (target == i).nonzero()
+                target_r = torch.index_select(target, 0, reduce.view(-1))
+                data_r = torch.index_select(data, 0, reduce.view(-1))
+                rand_idx = random.randint(0, class_slot - 1)
+                distributed_dataset[i * class_slot + rand_idx].append((data_r, target_r))
+
+    for i in range(int(num_workers * (1-args.get_mal_prop())), num_workers):
+        distributed_dataset.append(distributed_dataset[0])
 
     return distributed_dataset
 
@@ -56,16 +67,27 @@ def distribute_batches_2_class(train_data_loader, num_workers, args):
 
     for i in range(0, args.get_num_classes(), 2):
         for batch_idx, (data, target) in enumerate(train_data_loader):
-            if batch_idx < 1000:
+            if args.reduce == 0.1:
+                if batch_idx < 1000:
+                    reduce_1 = (target == i).nonzero()
+                    target_1 = torch.index_select(target, 0, reduce_1.view(-1))
+                    data_1 = torch.index_select(data, 0, reduce_1.view(-1))
+                    reduce_2 = (target == i+1).nonzero()
+                    target_2 = torch.index_select(target, 0, reduce_2.view(-1))
+                    data_2 = torch.index_select(data, 0, reduce_2.view(-1))
+                    rand_idx = random.randint(0, class_slot*2-1)
+                    distributed_dataset[i*class_slot + rand_idx].append((data_1, target_1))
+                    distributed_dataset[i*class_slot + rand_idx].append((data_2, target_2))
+            else:
                 reduce_1 = (target == i).nonzero()
                 target_1 = torch.index_select(target, 0, reduce_1.view(-1))
                 data_1 = torch.index_select(data, 0, reduce_1.view(-1))
-                reduce_2 = (target == i+1).nonzero()
+                reduce_2 = (target == i + 1).nonzero()
                 target_2 = torch.index_select(target, 0, reduce_2.view(-1))
                 data_2 = torch.index_select(data, 0, reduce_2.view(-1))
-                rand_idx = random.randint(0, class_slot*2-1)
-                distributed_dataset[i*class_slot + rand_idx].append((data_1, target_1))
-                distributed_dataset[i*class_slot + rand_idx].append((data_2, target_2))
+                rand_idx = random.randint(0, class_slot * 2 - 1)
+                distributed_dataset[i * class_slot + rand_idx].append((data_1, target_1))
+                distributed_dataset[i * class_slot + rand_idx].append((data_2, target_2))
 
     for i in range(int(num_workers * (1-args.get_mal_prop())), num_workers):
         distributed_dataset.append(distributed_dataset[0])

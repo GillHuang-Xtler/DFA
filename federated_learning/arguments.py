@@ -21,7 +21,7 @@ class Arguments:
     def __init__(self, logger):
         self.logger = logger
 
-        self.dataset = "fashion_mnist"  # "cifar_10" "fashion_mnist"
+        self.dataset = "cifar_10"  # "cifar_10" "fashion_mnist"
         self.batch_size = 10
         self.test_batch_size = 1000
         self.epochs = 100
@@ -41,14 +41,13 @@ class Arguments:
         self.epoch_save_end_suffix = "end"
         self.get_poison_effort = 'full'
         self.num_workers = 100
-        self.aggregation = "trmean"  # trmean, bulyan, mkrum, fedsgd
-        self.attack = "ndss"  # cua, ndss, lie, fang
+        self.aggregation = "median"  # trmean, bulyan, mkrum, fedsgd, median
+        self.attack = "ndss"  # cua, ndss, lie, fang, none
         self.ndss_deviation_type = "sign"  # std, sign
 
         self.cua_version = "target_class"  # target_class, infer_class
         self.cua_syn_data_version = "generator"  # generator, layer
 
-        self.num_attackers = 0
         self.dev_type = 'sign'
         self.mal_prop = 0.2
         self.num_reverse_layers = 3
@@ -72,6 +71,7 @@ class Arguments:
             self.scheduler_step_size = 50
             self.scheduler_gamma = 0.5
             self.min_lr = 1e-10
+            self.N = 50000
 
             self.train_data_loader_pickle_path = "data_loaders/cifar10/train_data_loader.pickle"
             self.test_data_loader_pickle_path = "data_loaders/cifar10/test_data_loader.pickle"
@@ -84,6 +84,7 @@ class Arguments:
             self.scheduler_step_size = 10
             self.scheduler_gamma = 0.1
             self.min_lr = 1e-10
+            self.N = 5000
 
             self.train_data_loader_pickle_path = "data_loaders/mnist/train_data_loader.pickle"
             self.test_data_loader_pickle_path = "data_loaders/mnist/test_data_loader.pickle"
@@ -97,7 +98,7 @@ class Arguments:
             self.scheduler_step_size = 10
             self.scheduler_gamma = 0.1
             self.min_lr = 1e-10
-
+            self.N = 5000
 
             self.train_data_loader_pickle_path = "data_loaders/fashion-mnist/train_data_loader.pickle"
             self.test_data_loader_pickle_path = "data_loaders/fashion-mnist/test_data_loader.pickle"
@@ -149,9 +150,6 @@ class Arguments:
 
     def get_cua_syn_data_version(self):
         return self.cua_syn_data_version
-
-    def get_dataset(self):
-        return self.dataset
 
     def get_round_worker_selection_strategy(self):
         return self.round_worker_selection_strategy
@@ -230,9 +228,6 @@ class Arguments:
 
     def get_num_epochs(self):
         return self.epochs
-
-    def get_num_attackers(self):
-        return self.num_attackers
 
     def get_num_classes(self):
         return self.num_classes

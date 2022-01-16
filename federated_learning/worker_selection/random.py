@@ -13,8 +13,11 @@ class RandomSelectionStrategy(SelectionStrategy):
     Randomly selects workers out of the list of all workers
     """
 
-    def select_round_workers(self, workers, poisoned_workers, kwargs):
-        return random.sample(workers, kwargs["NUM_WORKERS_PER_ROUND"])
+    def select_round_workers(self, args, workers, poisoned_workers, kwargs):
+        if args.get_attack_strategy() == "none":
+            return random.sample(workers[:int(len(workers)* (1-args.get_mal_prop()))], kwargs["NUM_WORKERS_PER_ROUND"])
+        else:
+            return random.sample(workers, kwargs["NUM_WORKERS_PER_ROUND"])
 
     def select_round_workers_minus_1(self, workers, poisoned_workers, kwargs):
         return random.sample(workers[:90], kwargs["NUM_WORKERS_PER_ROUND"]-1)

@@ -43,19 +43,18 @@ def train_subset_of_clients(epoch, args, clients, poisoned_workers):
     """
     kwargs = args.get_round_worker_selection_strategy_kwargs()
     kwargs["current_epoch_number"] = epoch
+    #
+    # if args.get_num_attackers() > 0:
+    #     random_workers = args.get_round_worker_selection_strategy().select_round_workers(
+    #         list(range(args.get_num_workers())),
+    #         poisoned_workers,
+    #         kwargs)
 
-    if args.get_num_attackers() > 0:
-        random_workers = args.get_round_worker_selection_strategy().select_round_workers(
-            list(range(args.get_num_workers())),
-            poisoned_workers,
-            kwargs)
-        # random_workers.append(random.randint(90,99))
-        # random_workers.extend([98, 99])
-    else:
-        random_workers = args.get_round_worker_selection_strategy().select_round_workers(
-            list(range(args.get_num_workers())),
-            poisoned_workers,
-            kwargs)
+    # else:
+    random_workers = args.get_round_worker_selection_strategy().select_round_workers(args,
+        list(range(args.get_num_workers())),
+        poisoned_workers,
+        kwargs)
 
     previous_weight = []
     for client_idx in random_workers:
@@ -234,7 +233,6 @@ def run_exp(replacement_method, num_poisoned_workers, KWARGS, client_selection_s
     print(max)
     print(sum(select_attacker_nums))
     print(sum(all_worker_nums))
-    print(sum(select_attacker_nums)/sum(all_worker_nums))
     args.get_logger().info("random all attacker num is #{}, selected attacker num is #{}, best acc is #{} ", str(sum(all_worker_nums)), str(sum(select_attacker_nums)), str(max))
 
     save_results(results, args.get_dataset() + "_" + args.get_aggregation_method() + "_" +args.get_attack_strategy() + "_" +str(args.get_mal_prop()) + "_" + args.get_distribution_method() + "_" + str(args.get_beta())  + "_" + results_files[0] )

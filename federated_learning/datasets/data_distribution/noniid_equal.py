@@ -138,7 +138,10 @@ def get_client_list(class_idx, num_workers, mal_prop, args, type):
     elif type == 2:
         idx_shift = int(num_benign_workers / args.get_num_classes())
         num_client_per_class = idx_shift * 2
-        res = random.sample(range(num_benign_workers), num_client_per_class)
+        # res = random.sample(range(num_benign_workers), num_client_per_class)
+        tmp = np.random.default_rng(seed=class_idx)
+        res = tmp.choice(num_benign_workers, size=num_client_per_class)
+        res = res.tolist()
     else:
         res = []
     return res
@@ -154,11 +157,11 @@ def distribute_batches_dirichlet_new(train_data_loader, num_workers, mal_prop, a
     num_class = args.get_num_classes()
 
     # for benign users
-    N = 5000
+    N = args.N
     # len(train_data_loader*args.get_batch_size()
     args.get_logger().info("total number for Dirichlet is #{}, with beta as #{}", N, args.get_beta())
     np.random.seed(20220114)
-    random.seed(20220114)
+    # random.seed(20220114)
 
     dataset = None
     for i in range(num_class):
@@ -209,7 +212,7 @@ def distribute_batches_dirichlet_type0(train_data_loader, num_workers, mal_prop,
     num_class = args.get_num_classes()
 
     # for benign users
-    N = 5000
+    N = args.N
     # len(train_data_loader*args.get_batch_size()
     args.get_logger().info("total number for Dirichlet is #{}, with beta as #{}", N, args.get_beta())
     np.random.seed(2022)

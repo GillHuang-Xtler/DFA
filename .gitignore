@@ -9,4 +9,5 @@
 ./vector_cache
 /tmp_models
 submit.sh
+*.DS_Store
 

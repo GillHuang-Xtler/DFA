@@ -75,7 +75,7 @@ def train_subset_of_clients(epoch, args, clients, poisoned_workers):
     elif args.get_attack_strategy() == "fang":
         dict_parameters = fang_nn_parameters(dict_parameters, args)
     elif args.get_attack_strategy() == "freerider":
-        dict_parameters = free_rand_nn_parameters(parameters, previous_weight, args)
+        dict_parameters = free_rand_nn_parameters(dict_parameters, args)
         # dict_parameters = free_last_nn_parameters(parameters, previous_weight, args)
 
     # defenses

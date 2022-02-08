@@ -142,14 +142,11 @@ def fang_nn_parameters(dict_parameters, args):
                 all_updates = []
 
                 for idx in dict_parameters.keys():
-                    all_updates.append(dict_parameters[idx][name])
-
-                # if name == "bn1.num_batches_tracked":
-                #     print(all_updates[0].shape)
+                    if idx < args.get_num_workers() * (1 - args.get_mal_prop()):
+                        all_updates.append(dict_parameters[idx][name])
 
                 mal_param[name] = fang_attack_on_one_layer(torch.stack(all_updates))
-                # if name == "bn1.num_batches_tracked":
-                    # print(mal_param[name].shape)
+
                 if "num_batches_tracked" in name:
                     mal_param[name] = mal_param[name][0]
             new_parameters[client_idx] = mal_param
@@ -311,31 +308,52 @@ def free_nn_parameters(parameters, previous_weight, args):
     dict_parameters = {client_idx: new_parameters[client_idx] for client_idx in range(len(parameters))}
     return dict_parameters
 
-def free_rand_nn_parameters(parameters, previous_weight, args):
+# def free_rand_nn_parameters(parameters, previous_weight, args):
+#     """
+#     generate reverse all layers parameters.
+#
+#     :param parameters: nn model named parameters
+#     :type parameters: list
+#     """
+#
+#     args.get_logger().info("Data Free Untargeted Attack")
+#     new_parameters = []
+#     for params in parameters[:len(parameters)-args.get_num_attackers()]:
+#         new_parameters.append(params)
+#
+#     tmp = {}
+#     for name in previous_weight.keys():
+#         max_value = torch.max(previous_weight[name].data)
+#         min_value = torch.min(previous_weight[name].data)
+#         # print(previous_weight[name].data.size())
+#         tmp[name] = (torch.rand(previous_weight[name].data.size()))-0.5
+#         # tmp[name] = (torch.rand(previous_weight[name].data.size()))*(max_value-min_value) + min_value
+#
+#     for i in range(args.get_num_attackers()):
+#         new_parameters.append(tmp)
+#     args.get_logger().info("the last 2 client do not have any data for training and add random factor")
+#     dict_parameters = {client_idx: new_parameters[client_idx] for client_idx in range(len(parameters))}
+#     return dict_parameters
+
+def free_rand_nn_parameters(dict_parameters, args):
     """
-    generate reverse all layers parameters.
+    generate lie parameters.
 
     :param parameters: nn model named parameters
     :type parameters: list
     """
-
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     args.get_logger().info("Data Free Untargeted Attack")
-    new_parameters = []
-    for params in parameters[:len(parameters)-args.get_num_attackers()]:
-        new_parameters.append(params)
 
-    tmp = {}
-    for name in previous_weight.keys():
-        max_value = torch.max(previous_weight[name].data)
-        min_value = torch.min(previous_weight[name].data)
-        # print(previous_weight[name].data.size())
-        tmp[name] = (torch.rand(previous_weight[name].data.size()))-0.5
-        # tmp[name] = (torch.rand(previous_weight[name].data.size()))*(max_value-min_value) + min_value
+    for client_idx in dict_parameters.keys():
+        if client_idx >= args.get_num_workers() * (1 - args.get_mal_prop()):
+            mal_param = {}
+            for name in dict_parameters[client_idx].keys():
+                mal_param[name] = (torch.rand(dict_parameters[client_idx][name].data.size()))
+                # if "num_batches_tracked" in name:
+                #     mal_param[name] = mal_param[name][0].item()
+            dict_parameters[client_idx] = mal_param
 
-    for i in range(args.get_num_attackers()):
-        new_parameters.append(tmp)
-    args.get_logger().info("the last 2 client do not have any data for training and add random factor")
-    dict_parameters = {client_idx: new_parameters[client_idx] for client_idx in range(len(parameters))}
     return dict_parameters
 
 def free_last_nn_parameters(parameters, previous_weight, args):

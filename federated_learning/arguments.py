@@ -42,11 +42,13 @@ class Arguments:
         self.get_poison_effort = 'full'
         self.num_workers = 100
         self.aggregation = "mkrum"  # trmean, bulyan, mkrum, fedsgd, median
-        self.attack = "ndss"  # cua, ndss, lie, fang, none
+        self.attack = "cua"  # cua, ndss, lie, fang, none
         self.ndss_deviation_type = "sign"  # std, sign
 
         self.cua_version = "target_class"  # target_class, infer_class
         self.cua_syn_data_version = "generator"  # generator, layer
+        self.use_real_data = True
+        self.static = False
 
         self.dev_type = 'sign'
         self.mal_prop = 0.2
@@ -56,7 +58,7 @@ class Arguments:
         self.n_dim = 128
         # self.lie_z_value = {1:0.68947, 2:0.68947, 3:0.69847, 5:0.7054, 8:0.71904,10:0.72575, 12:0.73891}
 
-        self.beta = 0.1
+        self.beta = 0.5
         self.distribution_method = "noniid_dir_2"
 
         self.num_classes = 10
@@ -72,33 +74,15 @@ class Arguments:
             self.scheduler_gamma = 0.5
             self.min_lr = 1e-10
             self.N = 50000
-            self.generator_image_num = 150
+            self.generator_image_num = 50
             self.generator_local_epoch = 10
             self.layer_image_num = 50
-            self.layer_image_epoch = 20
+            self.layer_image_epoch = 10
             self.reduce = 1
 
             self.train_data_loader_pickle_path = "data_loaders/cifar10/train_data_loader.pickle"
             self.test_data_loader_pickle_path = "data_loaders/cifar10/test_data_loader.pickle"
 
-        elif self.dataset == "mnist":
-            self.net = MNISTCNN
-
-            self.lr = 0.001
-            self.momentum = 0.9
-            self.scheduler_step_size = 10
-            self.scheduler_gamma = 0.1
-            self.min_lr = 1e-10
-            self.N = 5000
-            self.generator_image_num = 50
-            self.generator_local_epoch = 5
-            self.layer_image_num = 20
-            self.layer_image_epoch = 10
-            self.reduce = 0.1
-
-
-            self.train_data_loader_pickle_path = "data_loaders/mnist/train_data_loader.pickle"
-            self.test_data_loader_pickle_path = "data_loaders/mnist/test_data_loader.pickle"
 
         elif self.dataset == "fashion_mnist":
             self.net = FashionMNISTCNN
@@ -112,8 +96,8 @@ class Arguments:
             self.N = 5000
             self.generator_image_num = 50
             self.generator_local_epoch = 5
-            self.layer_image_num = 20
-            self.layer_image_epoch = 10
+            self.layer_image_num = 50
+            self.layer_image_epoch = 5
             self.reduce = 0.1
 
             self.train_data_loader_pickle_path = "data_loaders/fashion-mnist/train_data_loader.pickle"
@@ -121,18 +105,6 @@ class Arguments:
             self.benign_data_loader_pickle_path = "data_loaders/fashion-mnist/benign_data_loader.pickle"
             self.malicious_data_loader_pickle_path = "data_loaders/fashion-mnist/malicious_data_loader.pickle"
 
-        elif self.dataset == "cifar_100":
-            self.net = Cifar100ResNet
-            # self.net = Cifar100VGG
-
-            self.lr = 0.01
-            self.momentum = 0.5
-            self.scheduler_step_size = 50
-            self.scheduler_gamma = 0.5
-            self.min_lr = 1e-10
-
-            self.train_data_loader_pickle_path = "data_loaders/cifar100/train_data_loader.pickle"
-            self.test_data_loader_pickle_path = "data_loaders/cifar100/test_data_loader.pickle"
 
         else:
             print("Incorrect dataset information, please check.")

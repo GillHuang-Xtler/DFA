@@ -1,5 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import umap
+from tqdm.auto import tqdm
 
 def plt_txt():
     filename = 'iid-bart.txt'
@@ -1429,6 +1431,123 @@ def plt_fang_comp():
     plt.legend()
     plt.show()
 
+def visualization_umap():
+    from sklearn.datasets import load_digits
+    import matplotlib.pyplot as plt
+    import torch
+    import numpy as np
+    import seaborn as sns
+    import pandas as pd
+
+
+    dfa_g = torch.load('plt/DFA-g-15.pt').reshape([50, 28*28]).data
+    dfa_r = torch.load('plt/DFA-r-15.pt').reshape([50, 28*28]).data
+    # print(type(dfa_g))
+    real = torch.load('/Users/huangjiyue/PycharmProjects/DFA/data/MNIST/processed/training.pt')
+    real_0 = []
+    for i in range(len(real[1])):
+        if real[1][i] == 0 and len(real_0)<500:
+            real_0.append(real[0][i])
+    real_t = torch.stack(real_0[250:300]).reshape([50, 28*28]).data.float()
+
+    data_g_r = torch.cat((dfa_g, dfa_r), 0).numpy()
+    target = np.zeros([100, ], int)
+    target[50:100] += 1
+    # target[100:] += 2
+    print(dfa_g.shape)
+    print(real_t.shape)
+    print(data_g_r.shape)
+
+    reducer = umap.UMAP(random_state=42)
+    embedding = reducer.fit_transform(data_g_r)
+    print(embedding.shape)
+
+    with sns.axes_style("darkgrid"):
+        fig, ax = plt.subplots(1,1, figsize=(7,4))
+
+    plt.scatter(embedding[:50, 0], embedding[:50, 1], c='#8ea0c5', cmap='Spectral', s=50, marker='^', label="ZKA-G")
+    plt.scatter(embedding[50:100, 0], embedding[50:100, 1], c='#d7a384', cmap='Spectral', s=50, marker='o', label="ZKA-R")
+    # plt.scatter(embedding[100:, 0], embedding[100:, 1], c='#BDB76B', cmap='Spectral', s=50, marker='*', label="Real-Y")
+
+    plt.xticks([])
+    plt.yticks([])
+
+    plt.legend(loc='lower left')
+
+
+    plt.show()
+
+def visualization_stripplot():
+    import pandas as pd
+    import seaborn as sns
+    import matplotlib.pyplot as plt
+    from pandas import Series,DataFrame
+
+    with sns.axes_style("darkgrid"):
+        f, ax = plt.subplots(2,1, figsize=(6,6))
+
+    data_f = {"data":['real-data','ZKA-R','ZKA-G'],
+            'mkrum':[5.81,	35.85,	21.58],
+            'trmean':[28.6,	73.29,	37.43],
+            'bulyan':[12.78,	13.66,	27.07],
+            'median':[11.23,	24.39,	25.73]}
+
+    iris_f = DataFrame(data_f)
+
+    # "Melt" the dataset to "long-form" or "tidy" representation
+    iris_f = pd.melt(iris_f, "data", var_name="defense")
+    iris_f = iris_f.rename(columns={'value': 'attack success rate'})
+
+    data_c = {"data":['real-data','ZKA-R','ZKA-G'],
+            'mkrum':[34.68,	50.8,	51.2],
+            'trmean':[71.62,	71.2,	75],
+            'bulyan':[35.6,	55.6,	56.6],
+            'median':[33.96,50.6,	52.4]}
+    iris_c = DataFrame(data_c)
+    iris_c = pd.melt(iris_c, "data", var_name="defense")
+    iris_c = iris_c.rename(columns={'value': 'attack success rate'})
+
+
+    # Initialize the figure
+    sns.despine(bottom=True, left=True)
+
+    # Show each observation with a scatterplot
+    # sns.stripplot(x='attack success rate', y="defense", hue="data",
+    #               data=iris, dodge=True, alpha=.4, zorder=1, s=10)
+
+    # Show the conditional means, aligning each pointplot in the
+    # center of the strips by adjusting the width allotted to each
+    # category (.8 by default) by the number of hue levels
+    sns.pointplot(ax=ax[0], x='attack success rate', y="defense", hue="data",
+                  data=iris_f, dodge=.8 - .8 / 3,
+                  join=False, palette="dark",
+                  markers="d", scale=1, ci=None)
+
+    # Improve the legend
+    handles, labels = ax[0].get_legend_handles_labels()
+    print(handles)
+    print(labels)
+    ax[0].legend(handles, labels,
+              handletextpad=0, columnspacing=1,
+              loc="lower right", ncol=3, frameon=True)
+
+
+    sns.despine(bottom=True, left=True)
+    sns.pointplot(ax=ax[1], x='attack success rate', y="defense", hue="data",
+                  data=iris_c, dodge=.8 - .8 / 3,
+                  join=False, palette="dark",
+                  markers="d", scale=1, ci=None)
+
+    # Improve the legend
+    handles, labels = ax[1].get_legend_handles_labels()
+    print(handles)
+    print(labels)
+    ax[1].legend(handles, labels,
+              handletextpad=0, columnspacing=1,
+              loc="upper right", ncol=3, frameon=True)
+
+    plt.show()
+
 if __name__ =='__main__':
     # plt_txt()
     # plt_acc()
@@ -1443,20 +1562,7 @@ if __name__ =='__main__':
     # plt_non_iid_distribution()
     # plt_none_noniid_defense()
     # plt_fang_comp()
+    visualization_umap()
 
-    path9='./res/12122_results.csv'
-    filename9 = path9
-    X9 = []
-    with open(filename9, 'r') as f:
-        lines = f.readlines()
-        for line in lines:
-            value = [float(s) for s in line.split(',')]
-            X9.append(value[0])
-    print(max(X9))
 
-    # plt.plot(X9, color='purple', label='Reduce-class-introp',linestyle=':', marker = 'o', markersize = 2)
 
-    plt.legend()
-    plt.xlabel('GLOBAL ROUNDS')
-    plt.ylabel('SOURCE CLASS RECALL')
-    # plt.show()

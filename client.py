@@ -6,6 +6,9 @@ from federated_learning.schedulers import MinCapableStepLR
 import os
 import numpy
 import copy
+import matplotlib.pyplot as plt
+import numpy as np
+import umap
 from federated_learning.utils import generate_train_loader, generate_train_loader_mal
 import torch.nn.functional as F
 
@@ -174,6 +177,8 @@ class Client:
             diff = diff * diff
             reg += torch.sqrt(torch.sum(diff).float())
 
+        # print("reeeeeeeeeeeg = " + str(reg))
+
         loss += (mu * reg)
 
         for key in net_param.keys():
@@ -188,6 +193,7 @@ class Client:
 
     def inference_global_model(self, noise_images):
         mal_dataset = []
+        mal_data = []
         for input in noise_images:
             if self.args.get_cua_version() == "infer_class":
                 input_temp = input.unsqueeze(0)
@@ -199,6 +205,12 @@ class Client:
                 raise Exception("wrong cua version")
 
             mal_dataset.append([input, predicted.data.squeeze(0)])
+            mal_data.append(input)
+
+        # mal_data = torch.stack(mal_data)
+        # print(mal_data.shape, "DFA-g mal data shape")
+        # torch.save(mal_data, "plt/DFA-g-20.pt")
+
         noise_images_labels = generate_train_loader_mal(self.args, mal_dataset)
         return noise_images_labels
 
@@ -225,23 +237,42 @@ class Client:
             counter += 1
         optimizer = optim.SGD(self.gen_net.parameters(), lr=0.01, momentum=0.9)
         mal_dataset = []
+        mal_data = []
         for j in range(image_num):
-            single_data_copy = torch.rand(1, 1, 38, 38)
-            for i in range(epoch_num):
-                optimizer.zero_grad()
-                # forward + backward + optimize
-                outputs, x0 = self.gen_net(single_data_copy)
-                # mal_dataset.append(x0)
-                loss_ = loss(outputs, single_output)
-                loss_.backward()
-                optimizer.step()
+            if self.args.static == False:
+                single_data_copy = torch.rand(1, 1, 38, 38)
+                for i in range(epoch_num):
+                    optimizer.zero_grad()
+                    # forward + backward + optimize
+                    outputs, x0 = self.gen_net(single_data_copy)
+                    # mal_dataset.append(x0)
+                    loss_ = loss(outputs, single_output)
+                    # self.args.get_logger().info("loss on training local layer model is #{} ", loss_)
+                    loss_.backward()
+                    optimizer.step()
+            else:
+                single_data_copy = torch.rand(1, 1, 38, 38)
+                for i in range(epoch_num):
+                    optimizer.zero_grad()
+                    # forward + backward + optimize
+                    outputs, x0 = self.gen_net(single_data_copy)
 
             predicted = torch.tensor([0])  # using 0 as the predicted label
 
             # _, predicted = torch.max(outputs, 1)  # using the inference label of gen_net
 
             mal_dataset.append([torch.squeeze(x0,0),predicted.data.squeeze(0)])
+            mal_data.append(torch.squeeze(x0,0))
+
+        # print(torch.stack(mal_data).shape)
+        # print(torch.sum(torch.std(torch.stack(mal_data),0)))
+        # print(torch.stack(mal_dataset).shape)
+        # print(np.var(torch.stack(mal_dataset,0)))
         noise_images_labels = generate_train_loader_mal(self.args, mal_dataset)
+
+        # mal_data = torch.stack(mal_data)
+        # print(mal_data.shape, "DFA-r mal data shape")
+        # torch.save(mal_data, "plt/DFA-r-20.pt")
 
         return noise_images_labels
 
@@ -289,8 +320,13 @@ class Client:
 
             if self.args.get_cua_syn_data_version() == "generator":
                 self.args.get_logger().info("cua synthetic data version: generator")
-                noise_images = self.get_init_balanced_syn_images(self.gen_net, num_class=10, factor=1)
-                mal_data_loader = self.inference_global_model(noise_images = noise_images)
+                if self.args.use_real_data == False:
+                    self.args.get_logger().info("using synthetic data")
+                    noise_images = self.get_init_balanced_syn_images(self.gen_net, num_class=10, factor=1)
+                    mal_data_loader = self.inference_global_model(noise_images = noise_images)
+                elif self.args.use_real_data == True:
+                    self.args.get_logger().info("using real data")
+                    mal_data_loader = self.train_data_loader
 
                 running_loss = 0.0
                 for i, (inputs, labels) in enumerate(mal_data_loader, 0):
@@ -301,28 +337,21 @@ class Client:
                     # inference
                     outputs = self.net(inputs)
 
-                    # training the generator
-                    # for gen_epoch in range (2):
-                    #     loss_gen = - self.loss_function(outputs, labels)
-                    #     print("generator training loss: " + str(loss_gen))
-                    #     loss_gen.backward(retain_graph=True)
-                    #     self.cua_gen_optimizer.step()
-
                     # forward + backward + optimize
                     loss = self.mal_loss_function(outputs, labels, self.net.state_dict(), self.new_params, self.pre_params)
                     loss.backward(retain_graph=True)
                     self.optimizer.step()
 
 
-                    cnt = 5
+
+                    cnt = self.args.generator_local_epoch
                     # training the generator
                     for gen_epoch in range(cnt):
-                        self.args.get_logger().info("Train generator on #{} epoches", cnt)
+                        # self.args.get_logger().info("Train generator on #{} epoches", cnt)
                         loss_gen = - self.loss_function(outputs, labels)
-                        self.args.get_logger().info("loss on training local generator is #{} ", loss_gen)
+                        # self.args.get_logger().info("loss on training local generator is #{} ", loss_gen)
                         loss_gen.backward(retain_graph=True)
                         self.cua_gen_optimizer.step()
-
 
 
             elif self.args.get_cua_syn_data_version() == "layer":
@@ -339,6 +368,7 @@ class Client:
                     # forward + backward + optimize
                     outputs = self.net(inputs)
                     loss = self.mal_loss_function(outputs, labels, self.net.state_dict(), self.new_params, self.pre_params)
+                    # loss = self.loss_function(outputs, labels)
                     loss.backward()
                     self.optimizer.step()
 

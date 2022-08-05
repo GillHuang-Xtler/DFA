@@ -226,9 +226,10 @@ class Client:
         loss = torch.nn.MSELoss()
 
         # single_output = torch.tensor([[0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]])  # even
+        single_output = torch.tensor([[1.0, 0.0, 0.0, 0.0, 0.0,0.0,0.0,0.0,0.0,0.0]])  # even
 
-        single_output = torch.rand(size=(1,10))
-        single_output = single_output / torch.sum(single_output)
+        # single_output = torch.rand(size=(1,10))
+        # single_output = single_output / torch.sum(single_output)
 
         counter = 0
         for param, (name, layer) in zip(self.gen_net.parameters(), self.gen_net.named_modules()):

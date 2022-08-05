@@ -21,7 +21,7 @@ class Arguments:
     def __init__(self, logger):
         self.logger = logger
 
-        self.dataset = "fashion_mnist"  # "cifar_10" "fashion_mnist"
+        self.dataset = "cifar_10"  # "cifar_10" "fashion_mnist"
         self.batch_size = 10
         self.test_batch_size = 1000
         self.epochs = 100
@@ -46,7 +46,7 @@ class Arguments:
         self.ndss_deviation_type = "sign"  # std, sign
 
         self.cua_version = "target_class"  # target_class, infer_class
-        self.cua_syn_data_version = "generator"  # generator, layer
+        self.cua_syn_data_version = "layer"  # generator, layer
         self.use_real_data = True
         self.static = False
 

@@ -1463,18 +1463,18 @@ def visualization_umap():
     print(embedding.shape)
 
     with sns.axes_style("darkgrid"):
-        fig, ax = plt.subplots(1,1, figsize=(7,4))
+        fig, ax = plt.subplots(1,1, sharex=True, figsize=(7,4))
 
-    plt.scatter(embedding[:50, 0], embedding[:50, 1], c='#8ea0c5', cmap='Spectral', s=50, marker='^', label="ZKA-G")
-    plt.scatter(embedding[50:100, 0], embedding[50:100, 1], c='#d7a384', cmap='Spectral', s=50, marker='o', label="ZKA-R")
+    ax.grid(True)
+    plt.scatter(embedding[:50, 0], embedding[:50, 1], c='#8ea0c5', cmap='Spectral', s=50, marker='^', label="DFA-G")
+    plt.scatter(embedding[50:100, 0], embedding[50:100, 1], c='#d7a384', cmap='Spectral', s=50, marker='o', label="DFA-R")
     # plt.scatter(embedding[100:, 0], embedding[100:, 1], c='#BDB76B', cmap='Spectral', s=50, marker='*', label="Real-Y")
 
-    plt.xticks([])
-    plt.yticks([])
+    # plt.xticks([])
+    # plt.yticks([])
 
     plt.legend(loc='lower left')
-
-
+    plt.savefig('visualization_umap.pdf')
     plt.show()
 
 def visualization_stripplot():
@@ -1484,9 +1484,9 @@ def visualization_stripplot():
     from pandas import Series,DataFrame
 
     with sns.axes_style("darkgrid"):
-        f, ax = plt.subplots(2,1, figsize=(6,6))
+        f, ax = plt.subplots(2,1, figsize=(7,6))
 
-    data_f = {"data":['real-data','ZKA-R','ZKA-G'],
+    data_f = {"data":['real-data','DFA-R','DFA-G'],
             'mkrum':[5.81,	35.85,	21.58],
             'trmean':[28.6,	73.29,	37.43],
             'bulyan':[12.78,	13.66,	27.07],
@@ -1498,7 +1498,7 @@ def visualization_stripplot():
     iris_f = pd.melt(iris_f, "data", var_name="defense")
     iris_f = iris_f.rename(columns={'value': 'attack success rate'})
 
-    data_c = {"data":['real-data','ZKA-R','ZKA-G'],
+    data_c = {"data":['real-data','DFA-R','DFA-G'],
             'mkrum':[34.68,	50.8,	51.2],
             'trmean':[71.62,	71.2,	75],
             'bulyan':[35.6,	55.6,	56.6],
@@ -1546,6 +1546,7 @@ def visualization_stripplot():
               handletextpad=0, columnspacing=1,
               loc="upper right", ncol=3, frameon=True)
 
+    plt.savefig('visualization_stripplot.pdf')
     plt.show()
 
 if __name__ =='__main__':
@@ -1563,6 +1564,6 @@ if __name__ =='__main__':
     # plt_none_noniid_defense()
     # plt_fang_comp()
     visualization_umap()
-
+    # visualization_stripplot()
 
 

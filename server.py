@@ -7,7 +7,7 @@ from federated_learning.datasets import FashionMNISTDataset
 from federated_learning.datasets.data_distribution import distribute_batches_equally,distribute_batches_bias, distribute_batches_1_class, distribute_batches_2_class, distribute_batches_dirichlet
 from federated_learning.datasets.data_distribution import distribute_batches_noniid_mal
 from federated_learning.utils import average_nn_parameters, fed_average_nn_parameters
-from federated_learning.utils.aggregation import krum_nn_parameters, multi_krum_nn_parameters, bulyan_nn_parameters, trmean_nn_parameters, median_nn_parameters, fgold_nn_parameters
+from federated_learning.utils.aggregation import krum_nn_parameters, multi_krum_nn_parameters, bulyan_nn_parameters, trmean_nn_parameters, median_nn_parameters, fgold_nn_parameters, dfad_nn_parameters
 from federated_learning.utils.attack import reverse_nn_parameters, ndss_nn_parameters, reverse_last_parameters, lie_nn_parameters, free_nn_parameters,free_last_nn_parameters, free_rand_nn_parameters, fang_nn_parameters
 from federated_learning.utils import convert_distributed_data_into_numpy
 from federated_learning.utils import poison_data
@@ -28,7 +28,7 @@ from federated_learning.worker_selection.random import RandomSelectionStrategy
 
 
 
-def train_subset_of_clients(epoch, args, clients, poisoned_workers):
+def train_subset_of_clients(epoch, args, clients, poisoned_workers, check_net, test_data_loader):
     """
     Train a subset of clients per round.
 
@@ -99,6 +99,8 @@ def train_subset_of_clients(epoch, args, clients, poisoned_workers):
         new_nn_params = median_nn_parameters(list(dict_parameters.values()), args)
     elif args.get_aggregation_method() == "fgold":
         new_nn_params = fgold_nn_parameters(dict_parameters, args)
+    elif args.get_aggregation_method() == "dfad":
+        new_nn_params, selected_idx = dfad_nn_parameters(dict_parameters, check_net, check_data_loader=test_data_loader, args=args)
 
 
     for client in clients:
@@ -108,7 +110,7 @@ def train_subset_of_clients(epoch, args, clients, poisoned_workers):
     all = 0
     select = 0
 
-    if args.get_aggregation_method() in ["mkrum", "krum", "bulyan"]:
+    if args.get_aggregation_method() in ["mkrum", "krum", "bulyan", "dfad"]:
 
         for i in random_workers:
             if i > 80:
@@ -147,7 +149,7 @@ def create_clients(args, train_data_loaders, test_data_loader, distributed_train
             clients.append(Client(args = args, client_idx = idx, is_mal= 'False', train_data_loader = train_data_loaders[idx], test_data_loader = test_data_loader, distributed_train_dataset = distributed_train_dataset[idx], gen_net = NetGenMnist(z_dim=args.n_dim)))
     return clients
 
-def run_machine_learning(clients, args, poisoned_workers):
+def run_machine_learning(clients, args, poisoned_workers, check_net, test_data_loader):
     """
     Complete machine learning over a series of clients.
     """
@@ -158,7 +160,7 @@ def run_machine_learning(clients, args, poisoned_workers):
 
 
     for epoch in range(1, args.get_num_epochs() + 1):
-        results, workers_selected, all_worker_num, select_attacker_num = train_subset_of_clients(epoch, args, clients, poisoned_workers)
+        results, workers_selected, all_worker_num, select_attacker_num = train_subset_of_clients(epoch, args, clients, poisoned_workers, check_net, test_data_loader)
         epoch_test_set_results.append(results)
         worker_selection.append(workers_selected)
         all_worker_nums.append(all_worker_num)
@@ -182,14 +184,12 @@ def run_exp(replacement_method, num_poisoned_workers, KWARGS, client_selection_s
 
     train_data_loader = load_train_data_loader(logger, args)
     test_data_loader = load_test_data_loader(logger, args)
-    # train_data = FashionMNISTDataset(args).load_train_dataset()
 
     # Distribute batches
 
     # if args.get_distribution_method() == "bias":
     #     distributed_train_dataset = distribute_batches_bias(train_data_loader, args.get_num_workers())
-    # elif args.get_distribution_method() == "iid":
-    #     distributed_train_dataset = distribute_batches_equally(train_data_loader, args.get_num_workers())
+
     if args.get_distribution_method() == "noniid_1":
         distributed_train_dataset = distribute_batches_1_class(train_data_loader, args.get_num_workers(), args = args)
     elif args.get_distribution_method() == "noniid_2":
@@ -200,9 +200,8 @@ def run_exp(replacement_method, num_poisoned_workers, KWARGS, client_selection_s
         distributed_train_dataset = distribute_batches_dirichlet(train_data_loader, args.get_num_workers(), args.get_mal_prop(), args = args, type=1)
     elif args.get_distribution_method() == "noniid_dir_2":
         distributed_train_dataset = distribute_batches_dirichlet(train_data_loader, args.get_num_workers(), args.get_mal_prop(), args = args, type=2)
-
-    # elif args.get_distribution_method() == "noniid_mal":
-    #     distributed_train_dataset = distribute_batches_noniid_mal(benign_data_loader, malicious_data_loader, args.get_num_workers(), args = args)
+    elif args.get_distribution_method() == "iid":
+        distributed_train_dataset = distribute_batches_equally(train_data_loader, args.get_num_workers())
     else:
         distributed_train_dataset = distribute_batches_equally(train_data_loader, args.get_num_workers())
 
@@ -218,7 +217,11 @@ def run_exp(replacement_method, num_poisoned_workers, KWARGS, client_selection_s
 
     clients = create_clients(args, train_data_loaders, test_data_loader, distributed_train_dataset)
 
-    results, worker_selection, all_worker_nums, select_attacker_nums = run_machine_learning(clients, args, poisoned_workers)
+    server_check_net = clients[0].load_default_model()
+    server_check_net.to(clients[0].device)
+
+    results, worker_selection, all_worker_nums, select_attacker_nums = run_machine_learning(clients, args,
+                                                                poisoned_workers, server_check_net, test_data_loader)
     max = 0
     for i in results:
         if i[0]>max:
@@ -226,7 +229,7 @@ def run_exp(replacement_method, num_poisoned_workers, KWARGS, client_selection_s
     print(max)
     print(sum(select_attacker_nums))
     print(sum(all_worker_nums))
-    args.get_logger().info("random all attacker num is #{}, selected attacker num is #{}, best acc is #{} ", str(sum(all_worker_nums)), str(sum(select_attacker_nums)), str(max))
+    args.get_logger().info("random all attacker num is #{}, selected attacker num is #{}, best acc is #{} , defense pass rate is #{}", str(sum(all_worker_nums)), str(sum(select_attacker_nums)), str(max), str(sum(select_attacker_nums/all_worker_nums)))
 
     save_results(results, args.get_dataset() + "_" + args.get_aggregation_method() + "_" +args.get_attack_strategy() + "_" +str(args.get_mal_prop()) + "_" + args.get_distribution_method() + "_" + str(args.get_beta())  + "_" + results_files[0] )
     save_results(worker_selection, args.get_dataset() + "_" + args.get_aggregation_method() + "_" +args.get_attack_strategy() + "_" +str(args.get_mal_prop()) + "_" + args.get_distribution_method() + "_" + str(args.get_beta()) + "_" + worker_selections_files[0])

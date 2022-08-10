@@ -41,13 +41,13 @@ class Arguments:
         self.epoch_save_end_suffix = "end"
         self.get_poison_effort = 'full'
         self.num_workers = 100
-        self.aggregation = "mkrum"  # trmean, bulyan, mkrum, fedsgd, median
+        self.aggregation = "dfad"  # trmean, bulyan, mkrum, fedsgd, median
         self.attack = "cua"  # cua, ndss, lie, fang, none
         self.ndss_deviation_type = "sign"  # std, sign
 
         self.cua_version = "target_class"  # target_class, infer_class
-        self.cua_syn_data_version = "layer"  # generator, layer
-        self.use_real_data = True
+        self.cua_syn_data_version = "generator"  # generator, layer
+        self.use_real_data = False
         self.static = False
 
         self.dev_type = 'sign'
@@ -59,7 +59,8 @@ class Arguments:
         # self.lie_z_value = {1:0.68947, 2:0.68947, 3:0.69847, 5:0.7054, 8:0.71904,10:0.72575, 12:0.73891}
 
         self.beta = 0.5
-        self.distribution_method = "noniid_dir_2"
+        self.defense_beta = 1
+        self.distribution_method = "noniid_dir_2"  # noniid_dir_2，iid
 
         self.num_classes = 10
 
@@ -261,6 +262,9 @@ class Arguments:
 
     def get_save_model_folder_path(self):
         return self.save_model_path
+
+    def get_defense_beta(self):
+        return self.defense_beta
 
     def get_learning_rate_from_epoch(self, epoch_idx):
         lr = self.lr * (self.scheduler_gamma ** int(epoch_idx / self.scheduler_step_size))

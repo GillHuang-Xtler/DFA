@@ -381,6 +381,7 @@ class Client:
                         running_loss = 0.0
             else:
                 print("cua synthetic data version error")
+        # self.local_test()
 
         # save model
         if self.args.should_save_model(epoch):
@@ -449,29 +450,38 @@ class Client:
 
         return accuracy, loss, class_precision, class_recall
 
-    def local_test(self):
-        self.net.eval()
-        correct = 0
-        total = 0
-        targets_ = []
-        pred_ = []
-        loss = 0.0
-        with torch.no_grad():
-            for (images, labels) in self.test_data_loader:
-                images, labels = images.to(self.device), labels.to(self.device)
-
-                outputs = self.net(images)
-                _, predicted = torch.max(outputs.data, 1)
-                total += labels.size(0)
-                correct += (predicted == labels).sum().item()
-
-                targets_.extend(labels.cpu().view_as(predicted).numpy())
-                pred_.extend(predicted.cpu().numpy())
-
-                loss += self.loss_function(outputs, labels).item()
-
-        accuracy = 100 * correct / total
-
-        self.args.get_logger().debug('Test local: Accuracy: {}/{} ({:.0f}%)'.format(correct, total, accuracy))
-
-        return accuracy
+    # def local_test(self):
+    #     self.args.get_logger().info("defense local test")
+    #     self.net.eval()
+    #     correct = 0
+    #     total = 0
+    #     targets_ = []
+    #     pred_ = []
+    #     loss = 0.0
+    #     with torch.no_grad():
+    #         for (images, labels) in self.test_data_loader:
+    #             images, labels = images.to(self.device), labels.to(self.device)
+    #
+    #             outputs = self.net(images)
+    #             _, predicted = torch.max(outputs.data, 1)
+    #             total += labels.size(0)
+    #             correct += (predicted == labels).sum().item()
+    #
+    #             targets_.extend(labels.cpu().view_as(predicted).numpy())
+    #             pred_.extend(predicted.cpu().numpy())
+    #
+    #     accuracy = 100 * correct / total
+    #     # confusion_mat = confusion_matrix(targets_, pred_)
+    #     # confusion_vec = np.sum(confusion_mat, axis=0)
+    #
+    #     class_bal_list = np.array([pred_.count(c) for c in range(0,10)])
+    #
+    #
+    #     self.args.get_logger().debug('Test local: Accuracy: {}/{} ({:.0f}%)'.format(correct, total, accuracy))
+    #     # self.args.get_logger().debug("Classification Report:\n" + classification_report(targets_, pred_))
+    #     # self.args.get_logger().debug("Confusion Matrix:\n" + str(confusion_mat))
+    #     # self.args.get_logger().debug("Confusion Vec:\n" + str(confusion_vec))
+    #     self.args.get_logger().debug("balance list:\n" + str(class_bal_list))
+    #     # self.args.get_logger().debug("Confusion STD:\n" + str(np.std(confusion_vec)))
+    #
+    #     return accuracy

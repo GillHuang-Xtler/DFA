@@ -58,7 +58,7 @@ class Arguments:
         self.n_dim = 128
         # self.lie_z_value = {1:0.68947, 2:0.68947, 3:0.69847, 5:0.7054, 8:0.71904,10:0.72575, 12:0.73891}
 
-        self.beta = 0.5
+        self.beta = 0.1
         self.defense_beta = 1
         self.distribution_method = "noniid_dir_2"  # noniid_dir_2，iid
 

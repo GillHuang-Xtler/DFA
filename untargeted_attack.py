@@ -5,8 +5,8 @@ from server import run_exp
 
 if __name__ == '__main__':
 
-    START_EXP_IDX = 2022081461
-    NUM_EXP = 3
+    START_EXP_IDX = 2022081662
+    NUM_EXP = 1
     NUM_POISONED_WORKERS = 0
     REPLACEMENT_METHOD = default_no_change
     KWARGS = {

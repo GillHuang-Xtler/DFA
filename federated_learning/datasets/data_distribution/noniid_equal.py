@@ -207,9 +207,12 @@ def distribute_batches_dirichlet_new(train_data_loader, num_workers, mal_prop, a
     for j in range(len(distributed_dataset)):
         if len(distributed_dataset[j]) == 0:
             copy_number = torch.randint(0,79,(1,)).tolist()[0]
-            distributed_dataset[j] = (distributed_dataset[copy_number])
-            if len(distributed_dataset[j]) == 0:
-                distributed_dataset[j] = distributed_dataset[j-1]
+            if len(distributed_dataset[copy_number]) != 0:
+                distributed_dataset[j] = (distributed_dataset[copy_number])
+            else:
+                print(copy_number, len(distributed_dataset[copy_number]))
+                distributed_dataset[j] = (distributed_dataset[copy_number+1])
+
         # sum += len(distributed_dataset[j])
     # print("total num of samples!!!!!!!!:", sum)
     return distributed_dataset

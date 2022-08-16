@@ -53,7 +53,7 @@ def lie_nn_parameters(dict_parameters, args):
     :type parameters: list
     """
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    args.get_logger().info("Doing NDSS attackers (using in server.py, writing in attack.py)")
+    args.get_logger().info("Doing LIE attackers")
 
     z_value = args.get_lie_z_value()
     mean_params = {}
@@ -95,6 +95,7 @@ def fang_attack_on_one_layer(all_updates):
     all_updates: the gradients/parameters of all chosen clients in one layer
     return: fang attack gradient/parameter
     """
+
     all_updates =  all_updates.type(torch.FloatTensor)
     if (len(all_updates.shape) == 1):
         all_updates = all_updates.reshape(-1,1)
